@@ -1,6 +1,6 @@
 {
-  "name": "cypress-junit-reporter",
-  "version": "0.0.1",
+  "name": "cypress-xml-reporter",
+  "version": "0.0.2",
   "description": "A JUnit XML reporter for Cypress that includes screenshots, videos, and logs.",
   "main": "src/cy-reporter.js",
   "scripts": {
