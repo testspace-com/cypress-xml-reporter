@@ -1,0 +1,20 @@
+name: Test Package
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '14'
+      - uses: testspace-com/setup-testspace@v1
+        with:
+          domain: ${{github.repository_owner}}
+      - run: npm install
+      - run: npm test
+      - name: Push test result to Testspace
+        run: |
+          testspace cypress/results/*.xml{cypress/e2e}
+        if: always()
