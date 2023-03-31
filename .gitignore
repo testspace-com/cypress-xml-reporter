@@ -4,3 +4,4 @@ cypress/videos
 cypress/results
 cypress/logs
 results.*
+.SAVE
