@@ -1,19 +1,22 @@
 {
   "name": "cypress-xml-reporter",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A JUnit XML reporter for Cypress that includes screenshots, videos, and logs.",
   "main": "src/cy-reporter.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "eslint src/*reporter*.js"
+    "data": "npx cypress run --spec cypress/e2e/**/data* --reporter src/cy-reporter.js",
+    "test": "npx cypress run --spec cypress/e2e/**/test* --reporter src/cy-reporter.js",
+    "lint": "eslint src/*reporter*.js cypress/e2e"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/testspace-com/cypress-junit-reporter.git"
+    "url": "git+https://github.com/testspace-com/cypress-xml-reporter.git"
   },
   "keywords": [
     "cypress",
     "junit",
+    "xml",
+    "xunit",
     "reporter"
   ],
   "author": {
@@ -22,11 +25,11 @@
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/testspace-com/cypress-junit-reporter/issues"
+    "url": "https://github.com/testspace-com/cypress-xml-reporter/issues"
   },
-  "homepage": "https://github.com/testspace-com/cypress-junit-reporter#readme",
+  "homepage": "https://github.com/testspace-com/cypress-xml-reporter#readme",
   "devDependencies": {
-    "cypress": "^12.8.1",
+    "cypress": "^12.9.0",
     "cypress-terminal-report": "^5.0.2",
     "eslint": "^8.36.0"
   },
