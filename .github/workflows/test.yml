@@ -2,19 +2,29 @@ name: Test Package
 on:
   workflow_dispatch:
 jobs:
-  test:
+  data:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: '14'
+          node-version: '16'
+      - run: npm install
+      - run: npm run data || true
+  test:
+    needs: data
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16'
       - uses: testspace-com/setup-testspace@v1
         with:
           domain: ${{github.repository_owner}}
       - run: npm install
-      - run: npm test
+      - run: npm run test
       - name: Push test result to Testspace
         run: |
-          testspace cypress/results/*.xml{cypress/e2e}
+          testspace cypress/results/results.test*
         if: always()
