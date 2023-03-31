@@ -29,7 +29,7 @@
   },
   "homepage": "https://github.com/testspace-com/cypress-xml-reporter#readme",
   "devDependencies": {
-    "cypress": "^12.8.1",
+    "cypress": "^12.9.0",
     "cypress-terminal-report": "^5.0.2",
     "eslint": "^8.36.0"
   },
