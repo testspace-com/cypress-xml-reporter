@@ -3,7 +3,10 @@ on:
   workflow_dispatch:
 jobs:
   test:
-    runs-on: ubuntu-latest
+   runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
@@ -17,5 +20,5 @@ jobs:
       - run: npm run test
       - name: Push test result to Testspace
         run: |
-          testspace cypress/results/results.test*
+          testspace [${{ matrix.os}}]cypress/results/results.test*
         if: always()
