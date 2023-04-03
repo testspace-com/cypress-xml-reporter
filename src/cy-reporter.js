@@ -57,7 +57,7 @@ function createTestRecord(test) {
     testFileName = testFileName.split(path.sep).join(path.posix.sep);
     theDescribeNames.reverse()
     theDescribeNames.push(test.title);
-    testFullName = theDescribeNames.join(" -- ");
+    testFullName = theDescribeNames.join(' -- ');
     testName     = testFullName.replace(className+' -- ','');
   }
 
@@ -66,7 +66,7 @@ function createTestRecord(test) {
     var aFailure        = {$: {message: err.message, type: err.name}, _: err.stack}; // Note, to force CDATA add "<< "
     var imageFilePath   = testFileName.split(SPEC_ROOT_DIR)[1].split(path.sep).join(path.posix.sep);
     var imageFileName   = SCREENSHOTS_DIR+imageFilePath+'/'+testFullName.replaceAll('"', '')+' (failed).png';
-    var imageScreenshot = "[[ATTACHMENT|"+imageFileName+"]]";
+    var imageScreenshot = '[[ATTACHMENT|'+imageFileName+']]';
     return {$: {name: testName, classname: className, time: test.duration/1000}, failure: aFailure, 'system-out': imageScreenshot};
   } else {
     return {$: {name: testName, classname: className, time: test.duration/1000}};
@@ -82,7 +82,7 @@ function CypressJUnit(runner, options) {
   var suites  = [];
 
   const stats = runner.stats;
-  console.log("START: options:", options)
+  console.log('START: options:', options)
 
   if (!fs.existsSync(RESULTS_DIR)){
     fs.mkdirSync(RESULTS_DIR);
@@ -104,11 +104,11 @@ function CypressJUnit(runner, options) {
     var _suite = {};
 
     if ( SUITE_COUNT == 0) {
-      _suite.name      = "Root Suite";
+      _suite.name      = 'Root Suite';
       _suite.file      = suite.file.split(path.sep).join(path.posix.sep);
       _suite.timestamp = Date.now();
       suites.push({suite: _suite, tests: new Array()})
-    } else if (SUITE_COUNT == 1) {  // "Parent Suite, any count above is considered a sub-suite"
+    } else if (SUITE_COUNT == 1) {  // Parent Suite, any count above is considered a sub-suite
       _suite.name      = suite.title;
       _suite.file      = suite.parent.file.split(path.sep).join(path.posix.sep);
       _suite.timestamp = Date.now();
@@ -134,7 +134,7 @@ function CypressJUnit(runner, options) {
     console.log('RUN END   ...');
 
     var rootStats = {
-      name: "Cypress Tests",
+      name: 'Cypress Tests',
       tests: stats.tests,
       failures: stats.failures,
       skipped:stats.tests - stats.failures - stats.passes,
@@ -157,13 +157,13 @@ function CypressJUnit(runner, options) {
       })
 
       var attachFilePath = s.suite.file.split(SPEC_ROOT_DIR)[1];
-      var videoFile      = VIDEOS_DIR+attachFilePath+".mp4";
-      var logFile        = LOGS_DIR+attachFilePath.replace(".js", ".txt");
-      var textFile       = "";
+      var videoFile      = VIDEOS_DIR+attachFilePath+'.mp4';
+      var logFile        = LOGS_DIR+attachFilePath.replace('.js', '.txt');
+      var textFile       = '';
       if (fs.existsSync(logFile)) {
         textFile = fs.readFileSync(logFile, 'utf8');
       }
-      var suiteAttachments = textFile+"[[ATTACHMENT|"+videoFile+"]]";
+      var suiteAttachments = textFile+'[[ATTACHMENT|'+videoFile+']]';
       var timedelta = (Date.now() - s.suite.timestamp) / 1000;
       var timestamp = new Date(s.suite.timestamp).toUTCString(); // toISOString().slice(0, -5)
       if (s.tests.length == 0 ) {
@@ -179,8 +179,8 @@ function CypressJUnit(runner, options) {
     var xml      = builder.buildObject(results);
     var filename = suites[0].suite.file;  // All Suites contain the spec filename
     var filepath = filename.split(SPEC_ROOT_DIR)[1];
-    fs.writeFileSync(RESULTS_DIR+"results."+filepath.split(path.posix.sep).join('-')+".xml", xml);
-    fs.writeFileSync("results.xml",xml);
+    fs.writeFileSync(RESULTS_DIR+'results.'+filepath.split(path.posix.sep).join('-')+'.xml', xml);
+    fs.writeFileSync('results.xml',xml);
 
   });
 

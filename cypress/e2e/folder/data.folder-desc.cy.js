@@ -1,5 +1,5 @@
 /**
- * Single Describe within a folder
+ * Describe within a folder
 */
 describe('TEST3', () => {
   it('case1', () => { });

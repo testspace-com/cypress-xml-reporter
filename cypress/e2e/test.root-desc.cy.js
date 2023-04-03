@@ -3,22 +3,24 @@ const parseString = require('xml2js').parseString;
 /**
  * Setting
  */
-const testName      = "test3.cy.js";
-const folder        = "folder/"
-const resultsFolder = "folder-"
+const focus    = 'root-desc';
+const ROOT_DIR = 'cypress/'
 
 /**
  * Derived settings
  */
 
-const testDataName = "data."+testName;
-const testFile     = "cypress/e2e/"+folder+testDataName;
-const resultsFile  = "cypress/results/results."+resultsFolder+testDataName+".xml";
-const videoFile    = "cypress/videos/"+folder+testDataName+".mp4";
+const testName     = 'test.'+focus+'.cy.js';
+const testDataName = 'data.'+focus+'.cy.js';
+const testFile     = ROOT_DIR+'e2e/'+testDataName;
+const resultsFile  = ROOT_DIR+'results/results.'+testDataName+'.xml';
+const videoFile    = ROOT_DIR+'videos/'+testDataName+'.mp4';
+
 /**
  * Failure(s) required settings
  */
-const screenshotFile  = "cypress/screenshots/"+"folder/"+testDataName+"/TEST3 -- case3 (failed).png";
+const screenshotFile1  = ROOT_DIR+'screenshots/'+testDataName+'/case3 (failed).png';
+const screenshotFile2  = ROOT_DIR+'screenshots/'+testDataName+'/TEST1 -- case3 (failed).png';
 
 /**
  * Globals
@@ -39,15 +41,38 @@ describe(testName, () => {
       expect(suites[0].$.name).to.equal('Root Suite');
     });
     it('Tests Count', () => {
-      expect(suites[0].$.tests).to.equal('0');
+      expect(suites[0].$.tests).to.equal('3');
     });
     it('File Name', () => {
-      expect(suites[1].$.file).to.equal(testFile);
+      expect(suites[0].$.file).to.equal(testFile);
+    });
+    it('System-out', () => {
+      var systemout = suites[0]['system-out'][0];
+      expect(systemout).to.equal('[[ATTACHMENT|'+videoFile+']]');
+    });
+    describe('Testcases', ()=> {
+      var testcases;
+      before(() => {
+        testcases = suites[0]['testcase'];
+      });
+      it('"case1" name', () => {
+        expect(testcases[0].$.name).to.equal('case1');
+      });
+      it('"case2" name', () => {
+        expect(testcases[1].$.name).to.equal('case2');
+      });
+      it('"case3" name', () => {
+        expect(testcases[2].$.name).to.equal('case3');
+      });
+      it('"case3" Failure', () => {
+        var systemout = testcases[2]['system-out'][0];
+        expect(systemout).to.equal('[[ATTACHMENT|'+screenshotFile1+']]');
+      })
     });
   });
   describe('TEST1', () => {
     it('Name', () => {
-      expect(suites[1].$.name).to.equal('TEST3');
+      expect(suites[1].$.name).to.equal('TEST1');
     });
     it('Tests Count', () => {
       expect(suites[1].$.tests).to.equal('3');
@@ -75,7 +100,7 @@ describe(testName, () => {
       });
       it('"case3" Failure', () => {
         var systemout = testcases[2]['system-out'][0];
-        expect(systemout).to.equal('[[ATTACHMENT|'+screenshotFile+']]');
+        expect(systemout).to.equal('[[ATTACHMENT|'+screenshotFile2+']]');
       })
     });
   });

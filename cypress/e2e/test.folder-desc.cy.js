@@ -1,26 +1,31 @@
 const parseString = require('xml2js').parseString;
 
 /**
- * Required Setting
+ * Setting
  */
-const testName = "test2.cy.js";
+const focus    = 'folder-desc';
+const ROOT_DIR = 'cypress/';
+
+const resultsFolder = "folder-";  // Reporter adds folder name with "-"
+const dataFolder    = "folder/";
+
+const testName     = 'test.'+focus+'.cy.js';
+const testDataName = 'data.'+focus+'.cy.js';
 
 /**
  * Derived settings
  */
 
-const testDataName = "data."+testName;
-const testFile     = "cypress/e2e/"+testDataName;
-const resultsFile  = "cypress/results/results."+testDataName+".xml";
-const videoFile    = "cypress/videos/"+testDataName+".mp4";
-
+const testFile     = ROOT_DIR+'e2e/'+dataFolder+testDataName;
+const resultsFile  = ROOT_DIR+'results/results.'+resultsFolder+testDataName+'.xml';
+const videoFile    = ROOT_DIR+'videos/'+dataFolder+testDataName+'.mp4';
 /**
  * Failure(s) required settings
  */
-const screenshotFile  = "cypress/screenshots/"+testDataName+"/TEST2 -- NESTED -- case3 (failed).png";
+const screenshotFile  = ROOT_DIR+'screenshots/'+dataFolder+testDataName+'/TEST3 -- case3 (failed).png';
 
 /**
- * Gobals
+ * Globals
  */
 var suites    = [];
 
@@ -44,12 +49,12 @@ describe(testName, () => {
       expect(suites[1].$.file).to.equal(testFile);
     });
   });
-  describe('TEST2', () => {
+  describe('TEST1', () => {
     it('Name', () => {
-      expect(suites[1].$.name).to.equal('TEST2');
+      expect(suites[1].$.name).to.equal('TEST3');
     });
     it('Tests Count', () => {
-      expect(suites[1].$.tests).to.equal('6');
+      expect(suites[1].$.tests).to.equal('3');
     });
     it('File Name', () => {
       expect(suites[1].$.file).to.equal(testFile);
@@ -72,17 +77,8 @@ describe(testName, () => {
       it('"case3" name', () => {
         expect(testcases[2].$.name).to.equal('case3');
       });
-      it('"NESTED -- case1" name', () => {
-        expect(testcases[3].$.name).to.equal('NESTED -- case1');
-      });
-      it('"NESTED -- case2" name', () => {
-        expect(testcases[4].$.name).to.equal('NESTED -- case2');
-      });
-      it('"NESTED -- case3" name', () => {
-        expect(testcases[5].$.name).to.equal('NESTED -- case3');
-      });
-      it('"NESTED -- case3" Failure', () => {
-        var systemout = testcases[5]['system-out'][0];
+      it('"case3" Failure', () => {
+        var systemout = testcases[2]['system-out'][0];
         expect(systemout).to.equal('[[ATTACHMENT|'+screenshotFile+']]');
       })
     });
