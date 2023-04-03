@@ -1,5 +1,5 @@
 /**
- * Single Describe
+ * Describe only
 */
 describe('TEST1', () => {
   it('case1', () => { });
@@ -7,4 +7,4 @@ describe('TEST1', () => {
   it('case3', () => {
     expect(1).to.equal(2);
   });
-})
+});

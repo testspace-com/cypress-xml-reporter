@@ -3,21 +3,23 @@ const parseString = require('xml2js').parseString;
 /**
  * Setting
  */
-const testName = "test0.cy.js";
+const focus    = 'root';
+const ROOT_DIR = 'cypress/'
 
 /**
  * Derived settings
  */
 
-const testDataName = "data."+testName;
-const testFile     = "cypress/e2e/"+testDataName;
-const resultsFile  = "cypress/results/results."+testDataName+".xml";
-const videoFile    = "cypress/videos/"+testDataName+".mp4";
+const testName     = 'test.'+focus+'.cy.js';
+const testDataName = 'data.'+focus+'.cy.js';
+const testFile     = ROOT_DIR+'e2e/'+testDataName;
+const resultsFile  = ROOT_DIR+'results/results.'+testDataName+'.xml';
+const videoFile    = ROOT_DIR+'videos/'+testDataName+'.mp4';
 
 /**
  * Failure(s) required settings
  */
-const screenshotFile  = "cypress/screenshots/"+testDataName+"/case3 (failed).png";
+const screenshotFile  = ROOT_DIR+'screenshots/'+testDataName+'/case3 (failed).png';
 
 /**
  * Globals
