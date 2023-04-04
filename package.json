@@ -6,6 +6,8 @@
   "scripts": {
     "data": "npx cypress run --spec \"cypress/e2e/**/data*\" --reporter src/cy-reporter.js",
     "test": "npx cypress run --spec \"cypress/e2e/**/test*\" --reporter src/cy-reporter.js",
+    "dataq": "npx cypress run --spec \"cypress/e2e/**/data*\" --reporter src/cy-reporter.js --quiet",
+    "testq": "npx cypress run --spec \"cypress/e2e/**/test*\" --reporter src/cy-reporter.js --quiet",
     "lint": "eslint src/*reporter*.js cypress/e2e"
   },
   "repository": {

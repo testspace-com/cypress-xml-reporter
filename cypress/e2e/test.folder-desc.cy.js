@@ -6,7 +6,7 @@ const parseString = require('xml2js').parseString;
 const focus    = 'folder-desc';
 const ROOT_DIR = 'cypress/';
 
-const resultsFolder = "folder-";  // Reporter adds folder name with "-"
+const resultsFolder = "folder__";  // Reporter adds folder name with "__"
 const dataFolder    = "folder/";
 
 const testName     = 'test.'+focus+'.cy.js';
