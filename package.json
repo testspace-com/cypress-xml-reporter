@@ -1,13 +1,11 @@
 {
   "name": "cypress-xml-reporter",
-  "version": "1.0.0",
+  "version": "0.0.4",
   "description": "A JUnit XML reporter for Cypress that includes screenshots, videos, and logs.",
   "main": "src/cy-reporter.js",
   "scripts": {
     "data": "npx cypress run --spec \"cypress/e2e/**/data*\" --reporter src/cy-reporter.js",
     "test": "npx cypress run --spec \"cypress/e2e/**/test*\" --reporter src/cy-reporter.js",
-    "dataq": "npx cypress run --spec \"cypress/e2e/**/data*\" --reporter src/cy-reporter.js --quiet",
-    "testq": "npx cypress run --spec \"cypress/e2e/**/test*\" --reporter src/cy-reporter.js --quiet",
     "lint": "eslint src/*reporter*.js cypress/e2e"
   },
   "repository": {
