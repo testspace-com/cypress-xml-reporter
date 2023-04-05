@@ -9,7 +9,6 @@ const builder = new xml2js.Builder({cdata: true});
 const fs      = require('fs');
 const path    = require('path');
 
-const Base = Mocha.reporters.Base;
 // https://github.com/mochajs/mocha/wiki/Third-party-reporters
 const {
   EVENT_RUN_BEGIN,
@@ -20,12 +19,16 @@ const {
   EVENT_SUITE_END
 } = Mocha.Runner.constants
 
-// Settings
-const RESULTS_DIR      = 'cypress/results/';
-const VIDEOS_DIR       = 'cypress/videos/';
-const LOGS_DIR         = 'cypress/logs/';
-const SCREENSHOTS_DIR  = 'cypress/screenshots/';
-const SPEC_ROOT_DIR    = 'cypress/e2e/';
+// Cypress Settings
+var specRoot;      // specPattern - https://docs.cypress.io/guides/references/configuration#Testing-Type-Specific-Options
+var videosFolder;
+var screenshotsFolder;
+
+// Logger Settings
+var logsFolders;
+
+// Reporter Setting
+var resultsFolder;
 
 /**
  * Process the Runner test object
@@ -39,11 +42,11 @@ function createTestRecord(test) {
   var testFileName;
   var className;
 
-  // Checking if Root Testsuite test cases (no Describe) - (i.e. SUITE_COUNT == 0)
+  // Checking if Root Testsuite test cases (no Describe) - (i.e. activeDescribeCount == 0)
   if ( test.title == test.fullTitle() ) {
     testName     = test.title;
     testFullName = test.title;
-    testFileName = test.parent.file.split(path.sep).join(path.posix.sep);
+    testFileName = test.parent.file.replaceAll(path.sep, path.posix.sep);
     className    = path.basename(test.parent.file); // trimming off the path
   } else {
     let parentObj = test.parent;
@@ -54,7 +57,7 @@ function createTestRecord(test) {
       testFileName = parentObj.parent.file
       parentObj    = parentObj.parent;
     }
-    testFileName = testFileName.split(path.sep).join(path.posix.sep);
+    testFileName = testFileName.replaceAll(path.sep, path.posix.sep);
     theDescribeNames.reverse()
     theDescribeNames.push(test.title);
     testFullName = theDescribeNames.join(' -- ');
@@ -64,8 +67,9 @@ function createTestRecord(test) {
   if (test.state === 'failed') {
     var err = test.err;
     var aFailure        = {$: {message: err.message, type: err.name}, _: err.stack}; // Note, to force CDATA add "<< "
-    var imageFilePath   = testFileName.split(SPEC_ROOT_DIR)[1].split(path.sep).join(path.posix.sep);
-    var imageFileName   = SCREENSHOTS_DIR+imageFilePath+'/'+testFullName.replaceAll('"', '')+' (failed).png';
+    var imageFilePath   = testFileName.split(specRoot)[1];
+    const regex = /"|\//g; // replace certain symbols with a space
+    var imageFileName   = screenshotsFolder + imageFilePath + '/' + testFullName.replaceAll(regex, '')+' (failed).png';
     var imageScreenshot = '[[ATTACHMENT|'+imageFileName+']]';
     return {$: {name: testName, classname: className, time: test.duration/1000}, failure: aFailure, 'system-out': imageScreenshot};
   } else {
@@ -74,64 +78,71 @@ function createTestRecord(test) {
 }
 
 function CypressJUnit(runner, options) {
-  Base.call(this, runner, options);
+  Mocha.reporters.Base.call(this, runner, options);
+
+  console.debug('START: options:', options)
+
+  // Default Settings
+  specRoot          = 'cypress/e2e/';
+  resultsFolder     = 'cypress/results/';
+  videosFolder      = 'cypress/videos/';
+  screenshotsFolder = 'cypress/screenshots/';
+  logsFolders       = 'cypress/logs/';
 
   // Variables
-  var NESTED_DESCRIBES;   // -1 = ROOT, 0 = TESTSUITE, > 0 = NESTED
-  var SUITE_COUNT;
+  var activeDescribes;   // 0 = ROOT, 1 = TESTSUITE, > 0 = NESTED
   var suites  = [];
-
   const stats = runner.stats;
-  console.log('START: options:', options)
 
-  if (!fs.existsSync(RESULTS_DIR)){
-    fs.mkdirSync(RESULTS_DIR);
+  if (!fs.existsSync(resultsFolder)){
+    fs.mkdirSync(resultsFolder);
   }
 
   runner.on(EVENT_TEST_PASS, function(test) {
-    console.log('       PASSS: %s', test.fullTitle())
+    console.debug('       PASSS: %s', test.fullTitle())
     suites[suites.length-1].tests.push(test);  // alway use active suite
   });
 
   runner.on(EVENT_TEST_FAIL, function(test) {
-    console.log('       FAIL:  %s', test.fullTitle()); // err.message, err.name, err.stack
+    console.debug('       FAIL:  %s', test.fullTitle()); // err.message, err.name, err.stack
     suites[suites.length-1].tests.push(test);  // alway use active suite
   });
 
   runner.on(EVENT_SUITE_BEGIN, function(suite) {
-    NESTED_DESCRIBES++;
-    SUITE_COUNT++;
-    var _suite = {};
 
-    if ( SUITE_COUNT == 0) {
+    activeDescribes++;
+    var _suite = {};
+    var _activeTestFile = ".. refer to parent test file";
+
+    if ( activeDescribes == 0) {
       _suite.name      = 'Root Suite';
-      _suite.file      = suite.file.split(path.sep).join(path.posix.sep);
+      _suite.file      = suite.file.replaceAll(path.sep, path.posix.sep);
       _suite.timestamp = Date.now();
-      suites.push({suite: _suite, tests: new Array()})
-    } else if (SUITE_COUNT == 1) {  // Parent Suite, any count above is considered a sub-suite
+      _activeTestFile  = _suite.file;
+      suites.push({suite: _suite, tests: new Array()});
+    } else if (activeDescribes == 1) {  // Parent Suite, any count above is considered a sub-suite
       _suite.name      = suite.title;
-      _suite.file      = suite.parent.file.split(path.sep).join(path.posix.sep);
+      _suite.file      = suite.parent.file.replaceAll(path.sep, path.posix.sep);
       _suite.timestamp = Date.now();
+      _activeTestFile  = _suite.file;
       suites.push({suite: _suite, tests: new Array()})
     }
-    console.log('  SUITE BEGIN ...',stats.suites, NESTED_DESCRIBES, SUITE_COUNT);
+    console.debug('  SUITE BEGIN ...', _activeTestFile, activeDescribes);
   });
 
   runner.on(EVENT_SUITE_END, function() {
-    console.log('  SUITE END   ...',stats.suites, NESTED_DESCRIBES, SUITE_COUNT);
-    SUITE_COUNT--;
-    NESTED_DESCRIBES--;
+    console.debug('  SUITE END   ...', activeDescribes);
+    activeDescribes--;
   });
 
   runner.on(EVENT_RUN_BEGIN, function() {
-    console.log('RUN BEGIN ...');
-    NESTED_DESCRIBES  = -2;
-    SUITE_COUNT = -1;
+    console.debug('RUN BEGIN ...');
+    activeDescribes  = -1;
     suites = [];
   });
 
   runner.on(EVENT_RUN_END, function() {
-    console.log('RUN END   ...');
+    console.debug('RUN END   ...');
 
     var rootStats = {
       name: 'Cypress Tests',
@@ -156,14 +167,13 @@ function CypressJUnit(runner, options) {
         if (t.state == 'failed') failures++;
       })
 
-      var attachFilePath = s.suite.file.split(SPEC_ROOT_DIR)[1];
-      var videoFile      = VIDEOS_DIR+attachFilePath+'.mp4';
-      var logFile        = LOGS_DIR+attachFilePath.replace('.js', '.txt');
+      var videoFile = s.suite.file.replace(specRoot, videosFolder)+'.mp4';
+      var logFile   = s.suite.file.replace(specRoot, logsFolders).replace('.js', '.txt');
       var textFile       = '';
       if (fs.existsSync(logFile)) {
         textFile = fs.readFileSync(logFile, 'utf8');
       }
-      var suiteAttachments = textFile+'[[ATTACHMENT|'+videoFile+']]';
+      var suiteAttachments = textFile + '[[ATTACHMENT|' + videoFile +']]';
       var timedelta = (Date.now() - s.suite.timestamp) / 1000;
       var timestamp = new Date(s.suite.timestamp).toUTCString(); // toISOString().slice(0, -5)
       if (s.tests.length == 0 ) {
@@ -177,10 +187,14 @@ function CypressJUnit(runner, options) {
 
     var results  = {testsuites: {$: rootStats, testsuite:testsuites} }
     var xml      = builder.buildObject(results);
-    var filename = suites[0].suite.file;  // All Suites contain the spec filename
-    var filepath = filename.split(SPEC_ROOT_DIR)[1];
-    fs.writeFileSync(RESULTS_DIR+'results.'+filepath.split(path.posix.sep).join('-')+'.xml', xml);
-    fs.writeFileSync('results.xml',xml);
+
+    /**
+     * Use the filename within the Suite. The relative file path is flatten, representing folder names with "__name"
+     */
+    var filename         = suites[0].suite.file;
+    var relativeFilePath = 'results.' + filename.split(specRoot)[1];
+    var newFilePath      = resultsFolder + relativeFilePath.replaceAll(path.posix.sep, '__')+'.xml';
+    fs.writeFileSync(newFilePath, xml)
 
   });
 

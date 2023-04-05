@@ -3,26 +3,23 @@ const parseString = require('xml2js').parseString;
 /**
  * Setting
  */
-const focus    = 'folder-desc';
-const ROOT_DIR = 'cypress/';
-
-const resultsFolder = "folder__";  // Reporter adds folder name with "__"
-const dataFolder    = "folder/";
-
-const testName     = 'test.'+focus+'.cy.js';
-const testDataName = 'data.'+focus+'.cy.js';
+const focus    = 'desc-testname-chars';
+const ROOT_DIR = 'cypress/'
 
 /**
  * Derived settings
  */
 
-const testFile     = ROOT_DIR+'e2e/'+dataFolder+testDataName;
-const resultsFile  = ROOT_DIR+'results/results.'+resultsFolder+testDataName+'.xml';
-const videoFile    = ROOT_DIR+'videos/'+dataFolder+testDataName+'.mp4';
+const testName     = 'test.'+focus+'.cy.js';
+const testDataName = 'data.'+focus+'.cy.js';
+const testFile     = ROOT_DIR+'e2e/'+testDataName;
+const resultsFile  = ROOT_DIR+'results/results.'+testDataName+'.xml';
+const videoFile    = ROOT_DIR+'videos/'+testDataName+'.mp4';
+
 /**
  * Failure(s) required settings
  */
-const screenshotFile  = ROOT_DIR+'screenshots/'+dataFolder+testDataName+'/TEST3 -- case3 (failed).png';
+const screenshotFile  = ROOT_DIR+'screenshots/'+testDataName+'/TESTNAMEwith slashes -- case3  other chars (failed).png';
 
 /**
  * Globals
@@ -49,9 +46,9 @@ describe(testName, () => {
       expect(suites[1].$.file).to.equal(testFile);
     });
   });
-  describe('TEST1', () => {
+  describe('"TEST SUITE" with Quotes and Slash', () => {
     it('Name', () => {
-      expect(suites[1].$.name).to.equal('TEST3');
+      expect(suites[1].$.name).to.equal('"TESTNAME"/with slashes');
     });
     it('Tests Count', () => {
       expect(suites[1].$.tests).to.equal('3');
@@ -74,10 +71,10 @@ describe(testName, () => {
       it('"case2" name', () => {
         expect(testcases[1].$.name).to.equal('case2');
       });
-      it('"case3" name', () => {
-        expect(testcases[2].$.name).to.equal('case3');
+      it('"case3" name with quotes and slash', () => {
+        expect(testcases[2].$.name).to.equal('"case3" / other chars');
       });
-      it('"case3" Failure', () => {
+      it('"case3" name with quotes and slash with failure', () => {
         var systemout = testcases[2]['system-out'][0];
         expect(systemout).to.equal('[[ATTACHMENT|'+screenshotFile+']]');
       })
