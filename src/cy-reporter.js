@@ -19,13 +19,6 @@ const {
   EVENT_SUITE_END
 } = Mocha.Runner.constants
 
-// Settings
-const VIDEOS_DIR       = 'cypress/videos/';
-const LOGS_DIR         = 'cypress/logs/';
-const SCREENSHOTS_DIR  = 'cypress/screenshots/';
-const SPEC_ROOT_DIR    = 'cypress/e2e/';
-
-
 // Cypress Settings
 var specRoot;      // specPattern - https://docs.cypress.io/guides/references/configuration#Testing-Type-Specific-Options
 var videosFolder;
@@ -53,7 +46,7 @@ function createTestRecord(test) {
   if ( test.title == test.fullTitle() ) {
     testName     = test.title;
     testFullName = test.title;
-    testFileName = test.parent.file.split(path.sep).join(path.posix.sep);
+    testFileName = test.parent.file.replaceAll(path.sep, path.posix.sep);
     className    = path.basename(test.parent.file); // trimming off the path
   } else {
     let parentObj = test.parent;
@@ -64,7 +57,7 @@ function createTestRecord(test) {
       testFileName = parentObj.parent.file
       parentObj    = parentObj.parent;
     }
-    testFileName = testFileName.split(path.sep).join(path.posix.sep);
+    testFileName = testFileName.replaceAll(path.sep, path.posix.sep);
     theDescribeNames.reverse()
     theDescribeNames.push(test.title);
     testFullName = theDescribeNames.join(' -- ');
@@ -74,8 +67,9 @@ function createTestRecord(test) {
   if (test.state === 'failed') {
     var err = test.err;
     var aFailure        = {$: {message: err.message, type: err.name}, _: err.stack}; // Note, to force CDATA add "<< "
-    var imageFilePath   = testFileName.split(specRoot)[1].split(path.sep).join(path.posix.sep);
-    var imageFileName   = screenshotsFolder + imageFilePath + '/' + testFullName.replaceAll('"', '')+' (failed).png';
+    var imageFilePath   = testFileName.split(specRoot)[1];
+    const regex = /"|\//g; // replace certain symbols with a space
+    var imageFileName   = screenshotsFolder + imageFilePath + '/' + testFullName.replaceAll(regex, '')+' (failed).png';
     var imageScreenshot = '[[ATTACHMENT|'+imageFileName+']]';
     return {$: {name: testName, classname: className, time: test.duration/1000}, failure: aFailure, 'system-out': imageScreenshot};
   } else {
@@ -122,15 +116,15 @@ function CypressJUnit(runner, options) {
 
     if ( activeDescribes == 0) {
       _suite.name      = 'Root Suite';
-      _suite.file      = suite.file.split(path.sep).join(path.posix.sep);
+      _suite.file      = suite.file.replaceAll(path.sep, path.posix.sep);
       _suite.timestamp = Date.now();
-      _activeTestFile   = _suite.file;
+      _activeTestFile  = _suite.file;
       suites.push({suite: _suite, tests: new Array()});
     } else if (activeDescribes == 1) {  // Parent Suite, any count above is considered a sub-suite
       _suite.name      = suite.title;
-      _suite.file      = suite.parent.file.split(path.sep).join(path.posix.sep);
+      _suite.file      = suite.parent.file.replaceAll(path.sep, path.posix.sep);
       _suite.timestamp = Date.now();
-      _activeTestFile   = _suite.file;
+      _activeTestFile  = _suite.file;
       suites.push({suite: _suite, tests: new Array()})
     }
     console.debug('  SUITE BEGIN ...', _activeTestFile, activeDescribes);
@@ -173,14 +167,13 @@ function CypressJUnit(runner, options) {
         if (t.state == 'failed') failures++;
       })
 
-      var attachFilePath = s.suite.file.split(specRoot)[1];
-      var videoFile      = videosFolder + attachFilePath+'.mp4';
-      var logFile        = logsFolders + attachFilePath.replace('.js', '.txt');
+      var videoFile = s.suite.file.replace(specRoot, videosFolder)+'.mp4';
+      var logFile   = s.suite.file.replace(specRoot, logsFolders).replace('.js', '.txt');
       var textFile       = '';
       if (fs.existsSync(logFile)) {
         textFile = fs.readFileSync(logFile, 'utf8');
       }
-      var suiteAttachments = textFile+'[[ATTACHMENT|'+videoFile+']]';
+      var suiteAttachments = textFile + '[[ATTACHMENT|' + videoFile +']]';
       var timedelta = (Date.now() - s.suite.timestamp) / 1000;
       var timestamp = new Date(s.suite.timestamp).toUTCString(); // toISOString().slice(0, -5)
       if (s.tests.length == 0 ) {
@@ -198,7 +191,7 @@ function CypressJUnit(runner, options) {
     /**
      * Use the filename within the Suite. The relative file path is flatten, representing folder names with "__name"
      */
-    var filename = suites[0].suite.file;
+    var filename         = suites[0].suite.file;
     var relativeFilePath = 'results.' + filename.split(specRoot)[1];
     var newFilePath      = resultsFolder + relativeFilePath.replaceAll(path.posix.sep, '__')+'.xml';
     fs.writeFileSync(newFilePath, xml)
