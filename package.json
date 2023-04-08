@@ -5,8 +5,8 @@
   "main": "src/cy-reporter.js",
   "scripts": {
     "data": "npx cypress run --spec \"cypress/e2e/**/data*\" --reporter src/cy-reporter.js",
-    "test": "npx cypress run --spec \"cypress/e2e/**/test*\" --reporter src/cy-reporter.js",
-    "lint": "eslint src/*reporter*.js cypress/e2e"
+    "test": "mocha tests --reporter xunit --reporter-options output=xunit.xml",
+    "lint": "eslint src/*reporter*.js cypress/e2e tests/*.js"
   },
   "repository": {
     "type": "git",
@@ -14,6 +14,7 @@
   },
   "keywords": [
     "cypress",
+    "mocha",
     "junit",
     "xml",
     "xunit",
@@ -31,9 +32,11 @@
   "devDependencies": {
     "cypress": "^12.9.0",
     "cypress-terminal-report": "^5.0.2",
-    "eslint": "^8.36.0"
+    "eslint": "^8.36.0",
+    "mocha": "^10.2.0"
   },
   "dependencies": {
+    "chai": "^4.3.7",
     "xml2js": "^0.4.23"
   }
 }
