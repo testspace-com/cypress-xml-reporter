@@ -6,8 +6,7 @@ const fs          = require('fs');
 /**
  * Setting
  */
-const focus        = 'desc-desc';  // has to match data file name
-const testDataName = 'data.'+focus+'.cy.js';
+const testDataName = 'data.desc-desc.cy.js';
 const testName     = path.basename(__filename);
 
 /**
