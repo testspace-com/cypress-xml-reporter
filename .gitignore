@@ -4,4 +4,5 @@ cypress/videos
 cypress/results
 cypress/logs
 results.*
+xunit.xml
 .SAVE

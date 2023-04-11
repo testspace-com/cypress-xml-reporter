@@ -1,42 +1,35 @@
+const expect = require("chai").expect;
 const parseString = require('xml2js').parseString;
+const path = require('path');
+const fs = require('fs');
 
 /**
  * Setting
  */
-const focus    = 'folder-desc';
-const ROOT_DIR = 'cypress/';
-
-const resultsFolder = "folder__";  // Reporter adds folder name with "__"
-const dataFolder    = "folder/";
-
-const testName     = 'test.'+focus+'.cy.js';
-const testDataName = 'data.'+focus+'.cy.js';
+const testName = path.basename(__filename);
+const testDataName = testName.replace('test.', 'data.').replace('.js', '.cy.js');
 
 /**
  * Derived settings
  */
-
-const testFile     = ROOT_DIR+'e2e/'+dataFolder+testDataName;
-const resultsFile  = ROOT_DIR+'results/results.'+resultsFolder+testDataName+'.xml';
-const videoFile    = ROOT_DIR+'videos/'+dataFolder+testDataName+'.mp4';
-/**
- * Failure(s) required settings
- */
-const screenshotFile  = ROOT_DIR+'screenshots/'+dataFolder+testDataName+'/TEST3 -- case3 (failed).png';
+const testFile = path.join('cypress', 'e2e', 'folder', testDataName);
+const resultsFile = path.join('cypress', 'results', 'folder', testDataName)+'.xml';
+const videoFile = path.join('cypress', 'videos', testDataName)+'.mp4';
+const screenshotFile = path.join('cypress', 'screenshots', 'folder', testDataName, 'TEST1 -- case3 (failed).png');
 
 /**
  * Globals
  */
-var suites    = [];
+var suites = [];
 
 before( () => {
-  cy.readFile(resultsFile).then((str) => {
-    parseString(str, function (err, results) {
-      suites = results.testsuites.testsuite;
-      cy.writeFile('results.json', suites)
-    });
+  var theFile = fs.readFileSync(resultsFile, 'utf-8');
+  parseString(theFile, function (err, results) {
+    suites = results.testsuites.testsuite;
+    fs.writeFileSync('results.json', JSON.stringify(suites, null, 2));
   });
 });
+
 describe(testName, () => {
   describe('Root Suite', () => {
     it('Name', () => {
@@ -51,7 +44,7 @@ describe(testName, () => {
   });
   describe('TEST1', () => {
     it('Name', () => {
-      expect(suites[1].$.name).to.equal('TEST3');
+      expect(suites[1].$.name).to.equal('TEST1');
     });
     it('Tests Count', () => {
       expect(suites[1].$.tests).to.equal('3');

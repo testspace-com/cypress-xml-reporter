@@ -1,7 +1,7 @@
 /**
  * Describe within a folder
 */
-describe('TEST3', () => {
+describe('TEST1', () => {
   it('case1', () => { });
   it('case2', () => { });
   it('case3', () => {

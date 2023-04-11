@@ -1,5 +1,6 @@
 name: Test Package
 on:
+  push:
   workflow_dispatch:
 jobs:
   test:
@@ -20,5 +21,5 @@ jobs:
       - run: npm run test
       - name: Push test result to Testspace
         run: |
-          testspace [${{ matrix.os}}]cypress/results/results.test*
+          testspace [${{ matrix.os}}]xunit.xml
         if: always()
