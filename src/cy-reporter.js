@@ -66,7 +66,7 @@ function createTestRecord(test) {
   if (test.state === 'failed') {
     var err = test.err;
     var failure = {$: {message: err.message, type: err.name}, _: err.stack}; // Note, to force CDATA add "<< "
-    const unsafeRegex = /[^A-Za-z0-9._-\s]/g;
+    const unsafeRegex = /[^ A-Za-z0-9._-]/g;
     var imageBasename = testFullName.replaceAll(unsafeRegex, '').substring(0, 242)+' (failed).png';
     var imageFile = path.join(testFileName.replace(specRoot, screenshotsFolder), imageBasename);
     var imageScreenshot = '[[ATTACHMENT|'+imageFile+']]';
