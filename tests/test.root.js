@@ -6,8 +6,8 @@ const fs          = require('fs');
 /**
  * Setting
  */
-const testDataName = 'data.root.cy.js';
 const testName     = path.basename(__filename);
+const testDataName = testName.replace('test.', 'data.').replace('.js', '.cy.js');
 
 /**
  * Derived settings

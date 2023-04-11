@@ -6,15 +6,15 @@ const fs          = require('fs');
 /**
  * Setting
  */
-const testDataName = 'data.desc-nest-desc.cy.js';
 const testName     = path.basename(__filename);
+const testDataName = testName.replace('test.', 'data.').replace('.js', '.cy.js');
 
 /**
  * Derived settings
  */
-const testFile       = path.join('cypress', 'e2e',          testDataName);
-const resultsFile    = path.join('cypress', 'results',      testDataName)+'.xml';
-const videoFile      = path.join('cypress', 'videos',       testDataName)+'.mp4';
+const testFile       = path.join('cypress', 'e2e',         testDataName);
+const resultsFile    = path.join('cypress', 'results',     testDataName)+'.xml';
+const videoFile      = path.join('cypress', 'videos',      testDataName)+'.mp4';
 const screenshotFile = path.join('cypress', 'screenshots', testDataName, 'TEST1 -- NEST -- case3 (failed).png');
 
 /**

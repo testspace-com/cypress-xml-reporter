@@ -173,9 +173,7 @@ function CypressJUnit(runner, options) {
         logContent = fs.readFileSync(logFile, 'utf8');
       }
       var videoFile = path.join(videosFolder, path.basename(s.suite.file))+'.mp4';
-      if (fs.existsSync(videoFile)) {
-        logContent += '\n[[ATTACHMENT|' + videoFile +']]';
-      }
+      logContent += '[[ATTACHMENT|' + videoFile +']]';
       var suiteRecord = { $: suiteStats, testcase: testCases, 'system-out': logContent };
       testSuites.push(suiteRecord);
     })

@@ -6,15 +6,15 @@ const fs          = require('fs');
 /**
  * Setting
  */
-const testDataName = 'data.desc-desc.cy.js';
 const testName     = path.basename(__filename);
+const testDataName = testName.replace('test.', 'data.').replace('.js', '.cy.js');
 
 /**
  * Derived settings
  */
-const testFile        = path.join('cypress', 'e2e',          testDataName);
-const resultsFile     = path.join('cypress', 'results',      testDataName)+'.xml';
-const videoFile       = path.join('cypress', 'videos',       testDataName)+'.mp4';
+const testFile        = path.join('cypress', 'e2e',         testDataName);
+const resultsFile     = path.join('cypress', 'results',     testDataName)+'.xml';
+const videoFile       = path.join('cypress', 'videos',      testDataName)+'.mp4';
 const screenshotFile1 = path.join('cypress', 'screenshots', testDataName, 'TEST1 -- case3 (failed).png');
 const screenshotFile2 = path.join('cypress', 'screenshots', testDataName, 'TEST2 -- case3 (failed).png');
 
