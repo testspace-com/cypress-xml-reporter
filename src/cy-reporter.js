@@ -66,8 +66,8 @@ function createTestRecord(test) {
   if (test.state === 'failed') {
     var err = test.err;
     var failure = {$: {message: err.message, type: err.name}, _: err.stack}; // Note, to force CDATA add "<< "
-    const unsafeRegex = /"|\//g;
-    var imageBasename = testFullName.replaceAll(unsafeRegex, '')+' (failed).png';
+    const unsafeRegex = /[^A-Za-z0-9._-\s]/g;
+    var imageBasename = testFullName.replaceAll(unsafeRegex, '').substring(0, 242)+' (failed).png';
     var imageFile = path.join(testFileName.replace(specRoot, screenshotsFolder), imageBasename);
     var imageScreenshot = '[[ATTACHMENT|'+imageFile+']]';
     return {$: {name: testName, classname: className, time: test.duration/1000}, failure: failure, 'system-out': imageScreenshot};
@@ -178,12 +178,12 @@ function CypressJUnit(runner, options) {
       testSuites.push(suiteRecord);
     })
 
-    var results = { testsuites: { $: rootStats, testsuite: testSuites } }
+    var results = {testsuites: {$: rootStats, testsuite: testSuites}}
     var xml = builder.buildObject(results);
     var xmlFile = suites[0].suite.file.replace(specRoot, resultsFolder)+'.xml';
     var folder = path.dirname(xmlFile);
     if (!fs.existsSync(folder)) {
-      fs.mkdirSync(folder, { recursive: true});
+      fs.mkdirSync(folder, {recursive: true});
     }
     fs.writeFileSync(xmlFile, xml)
   });

@@ -1,26 +1,26 @@
-const expect      = require("chai").expect;
+const expect = require("chai").expect;
 const parseString = require('xml2js').parseString;
-const path        = require('path');
-const fs          = require('fs');
+const path = require('path');
+const fs = require('fs');
 
 /**
  * Setting
  */
-const testName     = path.basename(__filename);
+const testName = path.basename(__filename);
 const testDataName = testName.replace('test.', 'data.').replace('.js', '.cy.js');
 
 /**
  * Derived settings
  */
-const testFile       = path.join('cypress', 'e2e', 'folder',         testDataName);
-const resultsFile    = path.join('cypress', 'results', 'folder',     testDataName)+'.xml';
-const videoFile      = path.join('cypress', 'videos',                testDataName)+'.mp4';
+const testFile = path.join('cypress', 'e2e', 'folder', testDataName);
+const resultsFile = path.join('cypress', 'results', 'folder', testDataName)+'.xml';
+const videoFile = path.join('cypress', 'videos', testDataName)+'.mp4';
 const screenshotFile = path.join('cypress', 'screenshots', 'folder', testDataName, 'TEST1 -- case3 (failed).png');
 
 /**
  * Globals
  */
-var suites    = [];
+var suites = [];
 
 before( () => {
   var theFile = fs.readFileSync(resultsFile, 'utf-8');
