@@ -8,6 +8,7 @@ const xml2js = require('xml2js');
 const builder = new xml2js.Builder({cdata: true});
 const fs = require('fs');
 const path = require('path');
+const cyConfig = require(path.join(__dirname,"../cypress.config.js"));
 
 // https://github.com/mochajs/mocha/wiki/Third-party-reporters
 const {
@@ -20,11 +21,13 @@ const {
 } = Mocha.Runner.constants
 
 // Cypress Settings
-var specRoot;      // https://docs.cypress.io/guides/references/configuration#Testing-Type-Specific-Options
+var specRoot;
+var e2eSpecRoot;
+var componentSpecRoot;
 var videosFolder;
 var screenshotsFolder;
 
-// Logger Settings
+// Logger plugin Settings
 var logsFolders;
 
 // Reporter Setting
@@ -35,6 +38,43 @@ var resultsFolder;
  * @param {Object} test
  * @returns {testcase record object}
  */
+
+function setConfiguration(options) {
+
+  console.debug('START: options:', options)
+
+  // Set defaults - https://docs.cypress.io/guides/references/configuration#Testing-Type-Specific-Options
+  e2eSpecRoot = path.join('cypress', 'e2e');
+  componentSpecRoot = 'src';
+  videosFolder = path.join('cypress', 'videos');
+  screenshotsFolder = path.join('cypress', 'screenshots');
+
+  logsFolders = path.join('cypress', 'logs');
+  resultsFolder = 'results';
+
+  if ('e2e' in cyConfig && 'specPattern' in cyConfig.e2e) {
+    let specPattern = cyConfig.e2e.specPattern;
+    let indx = specPattern.indexOf("/**/");
+    let root = specPattern.substring(0,indx);
+    e2eSpecRoot = path.normalize(root);
+    console.debug("e2e config:", e2eSpecRoot);
+  }
+  if ('component' in cyConfig && 'specPattern' in cyConfig.component) {
+    let specPattern = cyConfig.component.specPattern;
+    let indx = specPattern.indexOf("/**/");
+    let root = specPattern.substring(0,indx);
+    componentSpecRoot = path.normalize(root);
+    console.debug("component config:", componentSpecRoot);
+  }
+  if ('videosFolder' in cyConfig) {
+    videosFolder = path.normalize(cyConfig.videosFolder)
+    console.debug("videosFolder config:", videosFolder);
+  }
+  if ('screenshotsFolder' in cyConfig) {
+    screenshotsFolder = path.normalize(cyConfig.screenshotsFolder);
+    console.debug("screenshotsFolder config:", screenshotsFolder);
+  }
+}
 
 function createTestRecord(test) {
   var testName;
@@ -79,14 +119,7 @@ function createTestRecord(test) {
 function CypressJUnit(runner, options) {
   Mocha.reporters.Base.call(this, runner, options);
 
-  console.debug('START: options:', options)
-
-  // Default Settings
-  specRoot = path.join('cypress', 'e2e');
-  resultsFolder = path.join('cypress', 'results');
-  videosFolder = path.join('cypress', 'videos');
-  screenshotsFolder = path.join('cypress', 'screenshots');
-  logsFolders = path.join('cypress', 'logs');
+  setConfiguration(options);
 
   // Variables
   var activeDescribes;   // 0 = ROOT, 1 = TESTSUITE, > 0 = NESTED
@@ -109,12 +142,17 @@ function CypressJUnit(runner, options) {
     var _suite = {};
     var _activeTestFile = ".. refer to parent test file";
 
-    if ( activeDescribes == 0) {
+    if (activeDescribes == 0) {
       _suite.name = 'Root Suite';
       _suite.file = suite.file;
       _suite.timestamp = Date.now();
       _activeTestFile = _suite.file;
       suites.push({suite: _suite, tests: new Array()});
+      specRoot = e2eSpecRoot;
+      // Check if a Component spec is running
+      if (suite.file.startsWith(componentSpecRoot)) {
+        specRoot = componentSpecRoot;
+      }
     } else if (activeDescribes == 1) {  // Parent Suite, any count above is considered a sub-suite
       _suite.name = suite.title;
       _suite.file = suite.parent.file;
@@ -138,6 +176,9 @@ function CypressJUnit(runner, options) {
 
   runner.on(EVENT_RUN_END, function() {
     console.debug('RUN END   ...');
+
+    // Check if NO TESTS were executed
+    if (suites.length == 0 ) return;
 
     var rootStats = {
       name: 'Cypress Tests',
@@ -172,7 +213,7 @@ function CypressJUnit(runner, options) {
       if (fs.existsSync(logFile)) {
         logContent = fs.readFileSync(logFile, 'utf8');
       }
-      var videoFile = path.join(videosFolder, path.basename(s.suite.file))+'.mp4';
+      var videoFile = s.suite.file.replace(specRoot, videosFolder)+'.mp4';
       logContent += '[[ATTACHMENT|' + videoFile +']]';
       var suiteRecord = { $: suiteStats, testcase: testCases, 'system-out': logContent };
       testSuites.push(suiteRecord);
@@ -180,7 +221,7 @@ function CypressJUnit(runner, options) {
 
     var results = {testsuites: {$: rootStats, testsuite: testSuites}}
     var xml = builder.buildObject(results);
-    var xmlFile = suites[0].suite.file.replace(specRoot, resultsFolder)+'.xml';
+    var xmlFile = path.join(resultsFolder, suites[0].suite.file)+'.xml';
     var folder = path.dirname(xmlFile);
     if (!fs.existsSync(folder)) {
       fs.mkdirSync(folder, {recursive: true});

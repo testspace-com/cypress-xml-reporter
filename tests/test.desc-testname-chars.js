@@ -13,7 +13,7 @@ const testDataName = testName.replace('test.', 'data.').replace('.js', '.cy.js')
  * Derived settings
  */
 const testFile = path.join('cypress', 'e2e', testDataName);
-const resultsFile = path.join('cypress', 'results', testDataName)+'.xml';
+const resultsFile = path.join('results', testFile)+'.xml';
 const videoFile = path.join('cypress', 'videos', testDataName)+'.mp4';
 const screenshotFile = path.join('cypress', 'screenshots', testDataName, 'TESTNAMEwith slashes -- case3  other chars (failed).png');
 

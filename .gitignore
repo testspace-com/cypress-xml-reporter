@@ -1,8 +1,8 @@
 node_modules
 cypress/screenshots
 cypress/videos
-cypress/results
 cypress/logs
+results/
 results.*
 xunit.xml
 .SAVE
