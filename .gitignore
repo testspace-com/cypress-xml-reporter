@@ -5,4 +5,5 @@ cypress/logs
 results/
 results.*
 xunit.xml
+__config.json
 .SAVE

@@ -8,7 +8,6 @@ const xml2js = require('xml2js');
 const builder = new xml2js.Builder({cdata: true});
 const fs = require('fs');
 const path = require('path');
-const cyConfig = require(path.join(__dirname,"../cypress.config.js"));
 
 // https://github.com/mochajs/mocha/wiki/Third-party-reporters
 const {
@@ -22,8 +21,6 @@ const {
 
 // Cypress Settings
 var specRoot;
-var e2eSpecRoot;
-var componentSpecRoot;
 var videosFolder;
 var screenshotsFolder;
 
@@ -41,39 +38,35 @@ var resultsFolder;
 
 function setConfiguration(options) {
 
-  console.debug('START: options:', options)
+  console.debug('START: configuration & options:');
 
-  // Set defaults - https://docs.cypress.io/guides/references/configuration#Testing-Type-Specific-Options
-  e2eSpecRoot = path.join('cypress', 'e2e');
-  componentSpecRoot = 'src';
-  videosFolder = path.join('cypress', 'videos');
-  screenshotsFolder = path.join('cypress', 'screenshots');
-
-  logsFolders = path.join('cypress', 'logs');
   resultsFolder = 'results';
+  logsFolders = path.join('cypress', 'logs');
 
-  if ('e2e' in cyConfig && 'specPattern' in cyConfig.e2e) {
-    let specPattern = cyConfig.e2e.specPattern;
-    let indx = specPattern.indexOf("/**/");
-    let root = specPattern.substring(0,indx);
-    e2eSpecRoot = path.normalize(root);
-    console.debug("e2e config:", e2eSpecRoot);
+  // Add error checking!!
+  const JSON_FILE = "__config.json";
+  try {
+    const jsonConfig = fs.readFileSync(JSON_FILE);
+    const objConfig  = JSON.parse(jsonConfig);
+    var specPattern = objConfig.resolved.specPattern.value;
+    var indx = specPattern.indexOf("/**/");
+    var root = specPattern.substring(0,indx);
+    specRoot = path.normalize(root);
+    videosFolder = path.normalize(objConfig.resolved.videosFolder.value);
+    screenshotsFolder = path.normalize(objConfig.resolved.screenshotsFolder.value);
+
+    console.log("  Testing Type:", objConfig.testingType);
+    console.log("  specPattern:", specPattern);
+    console.log("  specRoot:", specRoot);
+    console.log("  VideoFolder:", videosFolder);
+    console.log("  ScreenshotsFolder:", screenshotsFolder);
+
+  } catch (error) {
+    console.error("cypress.config.js requires 'config' plugin \n", error);
+    throw error;
   }
-  if ('component' in cyConfig && 'specPattern' in cyConfig.component) {
-    let specPattern = cyConfig.component.specPattern;
-    let indx = specPattern.indexOf("/**/");
-    let root = specPattern.substring(0,indx);
-    componentSpecRoot = path.normalize(root);
-    console.debug("component config:", componentSpecRoot);
-  }
-  if ('videosFolder' in cyConfig) {
-    videosFolder = path.normalize(cyConfig.videosFolder)
-    console.debug("videosFolder config:", videosFolder);
-  }
-  if ('screenshotsFolder' in cyConfig) {
-    screenshotsFolder = path.normalize(cyConfig.screenshotsFolder);
-    console.debug("screenshotsFolder config:", screenshotsFolder);
-  }
+  console.log("  Options:", options);
+
 }
 
 function createTestRecord(test) {
@@ -116,7 +109,7 @@ function createTestRecord(test) {
   }
 }
 
-function CypressJUnit(runner, options) {
+function CypressXML(runner, options) {
   Mocha.reporters.Base.call(this, runner, options);
 
   setConfiguration(options);
@@ -148,11 +141,6 @@ function CypressJUnit(runner, options) {
       _suite.timestamp = Date.now();
       _activeTestFile = _suite.file;
       suites.push({suite: _suite, tests: new Array()});
-      specRoot = e2eSpecRoot;
-      // Check if a Component spec is running
-      if (suite.file.startsWith(componentSpecRoot)) {
-        specRoot = componentSpecRoot;
-      }
     } else if (activeDescribes == 1) {  // Parent Suite, any count above is considered a sub-suite
       _suite.name = suite.title;
       _suite.file = suite.parent.file;
@@ -231,4 +219,4 @@ function CypressJUnit(runner, options) {
 
 }
 
-module.exports = CypressJUnit;
+module.exports = CypressXML;
