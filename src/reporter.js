@@ -8,6 +8,7 @@ const xml2js = require('xml2js');
 const builder = new xml2js.Builder({cdata: true});
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 
 // https://github.com/mochajs/mocha/wiki/Third-party-reporters
 const {
@@ -20,12 +21,11 @@ const {
 } = Mocha.Runner.constants
 
 // Cypress Settings
-var specRoot;      // https://docs.cypress.io/guides/references/configuration#Testing-Type-Specific-Options
 var videosFolder;
 var screenshotsFolder;
 
-// Logger Settings
-var logsFolders;
+// Cypress Terminal plugin settings - https://github.com/archfz/cypress-terminal-report
+var logsFolder;
 
 // Reporter Setting
 var resultsFolder;
@@ -36,17 +36,38 @@ var resultsFolder;
  * @returns {testcase record object}
  */
 
-function createTestRecord(test) {
+function loadConfiguration(options) {
+
+  console.debug('START: configuration & options:');
+
+  resultsFolder = 'results';
+  logsFolder = path.join('cypress', 'logs');
+
+  const CONFIG_FILE = path.join(os.tmpdir(), "cxr-cypress.config.json");
+  if (!fs.existsSync(CONFIG_FILE)) {
+    throw new Error("This reporter requires to be configured as a plugin in 'cypress.config.js'");
+  }
+
+  const jsonConfig = fs.readFileSync(CONFIG_FILE);
+  const objConfig = JSON.parse(jsonConfig);
+  videosFolder = path.normalize(objConfig.resolved.videosFolder.value);
+  screenshotsFolder = path.normalize(objConfig.resolved.screenshotsFolder.value);
+
+  console.debug("  Testing Type:", objConfig.testingType);
+  console.debug("  VideoFolder:", videosFolder);
+  console.debug("  ScreenshotsFolder:", screenshotsFolder);
+  console.debug("  Options:", options);
+}
+
+function createTestRecord(test, specRelativePath) {
   var testName;
   var testFullName; // Needed for Image File naming :<
-  var testFileName;
   var className;
 
   // Checking if Root Testsuite test cases (no Describe) - (i.e. activeDescribeCount == 0)
   if ( test.title == test.fullTitle() ) {
     testName = test.title;
     testFullName = test.title;
-    testFileName = test.parent.file;
     className = path.basename(test.parent.file); // trimming off the path
   } else {
     let parentObj = test.parent;
@@ -54,7 +75,6 @@ function createTestRecord(test) {
     while (parentObj.title != '') {
       theDescribeNames.push(parentObj.title);
       className = parentObj.title;
-      testFileName = parentObj.parent.file
       parentObj = parentObj.parent;
     }
     theDescribeNames.reverse()
@@ -68,7 +88,7 @@ function createTestRecord(test) {
     var failure = {$: {message: err.message, type: err.name}, _: err.stack}; // Note, to force CDATA add "<< "
     const unsafeRegex = /[^ A-Za-z0-9._-]/g;
     var imageBasename = testFullName.replaceAll(unsafeRegex, '').substring(0, 242)+' (failed).png';
-    var imageFile = path.join(testFileName.replace(specRoot, screenshotsFolder), imageBasename);
+    var imageFile = path.join(screenshotsFolder, specRelativePath, imageBasename);
     var imageScreenshot = '[[ATTACHMENT|'+imageFile+']]';
     return {$: {name: testName, classname: className, time: test.duration/1000}, failure: failure, 'system-out': imageScreenshot};
   } else {
@@ -76,17 +96,10 @@ function createTestRecord(test) {
   }
 }
 
-function CypressJUnit(runner, options) {
+function CypressXML(runner, options) {
   Mocha.reporters.Base.call(this, runner, options);
 
-  console.debug('START: options:', options)
-
-  // Default Settings
-  specRoot = path.join('cypress', 'e2e');
-  resultsFolder = path.join('cypress', 'results');
-  videosFolder = path.join('cypress', 'videos');
-  screenshotsFolder = path.join('cypress', 'screenshots');
-  logsFolders = path.join('cypress', 'logs');
+  loadConfiguration(options);
 
   // Variables
   var activeDescribes;   // 0 = ROOT, 1 = TESTSUITE, > 0 = NESTED
@@ -109,7 +122,7 @@ function CypressJUnit(runner, options) {
     var _suite = {};
     var _activeTestFile = ".. refer to parent test file";
 
-    if ( activeDescribes == 0) {
+    if (activeDescribes == 0) {
       _suite.name = 'Root Suite';
       _suite.file = suite.file;
       _suite.timestamp = Date.now();
@@ -139,6 +152,13 @@ function CypressJUnit(runner, options) {
   runner.on(EVENT_RUN_END, function() {
     console.debug('RUN END   ...');
 
+    const SPEC_FILE = path.join(os.tmpdir(), "crx-cypress-spec-relative-path");
+    const specRelativePath = path.normalize(fs.readFileSync(SPEC_FILE).toString());
+    console.debug("specRelative:", specRelativePath);
+
+    // Check if NO TESTS were executed
+    if (suites.length == 0) return;
+
     var rootStats = {
       name: 'Cypress Tests',
       tests: stats.tests,
@@ -163,16 +183,16 @@ function CypressJUnit(runner, options) {
       }
       var testCases = [];
       s.tests.forEach( function(t){
-        testCases.push(createTestRecord(t));
+        testCases.push(createTestRecord(t, specRelativePath));
         if (t.state == 'failed') suiteStats.failures++;
       })
 
-      var logFile = s.suite.file.replace(specRoot, logsFolders).replace('.js', '.txt');
+      var logFile = path.join(logsFolder, specRelativePath).replace('.js', '.txt');
       var logContent = '';
       if (fs.existsSync(logFile)) {
         logContent = fs.readFileSync(logFile, 'utf8');
       }
-      var videoFile = path.join(videosFolder, path.basename(s.suite.file))+'.mp4';
+      var videoFile = path.join(videosFolder, specRelativePath)+'.mp4';
       logContent += '[[ATTACHMENT|' + videoFile +']]';
       var suiteRecord = { $: suiteStats, testcase: testCases, 'system-out': logContent };
       testSuites.push(suiteRecord);
@@ -180,7 +200,7 @@ function CypressJUnit(runner, options) {
 
     var results = {testsuites: {$: rootStats, testsuite: testSuites}}
     var xml = builder.buildObject(results);
-    var xmlFile = suites[0].suite.file.replace(specRoot, resultsFolder)+'.xml';
+    var xmlFile = path.join(resultsFolder, suites[0].suite.file)+'.xml';
     var folder = path.dirname(xmlFile);
     if (!fs.existsSync(folder)) {
       fs.mkdirSync(folder, {recursive: true});
@@ -190,4 +210,4 @@ function CypressJUnit(runner, options) {
 
 }
 
-module.exports = CypressJUnit;
+module.exports = CypressXML;

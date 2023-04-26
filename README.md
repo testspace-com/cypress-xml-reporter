@@ -12,6 +12,16 @@ For including logs the https://www.npmjs.com/package/cypress-terminal-report pac
 npm install cypress-terminal-report --save-dev
 ```
 
+Register the *plugin* in `cypress.config.js`:
+```
+module.exports = defineConfig({
+  e2e: {
+    setupNodeEvents(on, config) {
+      require('cypress-xml-reporter/src/plugin') (on);
+    }
+  }
+});
+```
 
 ## Usage
 TBD
