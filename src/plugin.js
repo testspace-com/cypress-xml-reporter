@@ -10,11 +10,9 @@ module.exports = function (on) {
   });
   on('after:run', async()  => {
     fs.unlinkSync(CONFIG_FILE);
+    fs.unlinkSync(SPEC_FILE);
   });
   on('before:spec', async(spec) => {
-    fs.writeFileSync(SPEC_FILE, spec.relativeToCommonRoot);
-  });
-  on('after:spec', async(spec) => {
     fs.writeFileSync(SPEC_FILE, spec.relativeToCommonRoot);
   });
 };
