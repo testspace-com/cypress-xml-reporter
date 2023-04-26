@@ -21,7 +21,6 @@ const {
 } = Mocha.Runner.constants
 
 // Cypress Settings
-var specRoot;
 var videosFolder;
 var screenshotsFolder;
 
@@ -51,32 +50,24 @@ function loadConfiguration(options) {
 
   const jsonConfig = fs.readFileSync(CONFIG_FILE);
   const objConfig  = JSON.parse(jsonConfig);
-  var specPattern = objConfig.resolved.specPattern.value;
-  var indx = specPattern.indexOf("/**/");
-  var root = specPattern.substring(0,indx);
-  specRoot = path.normalize(root);
   videosFolder = path.normalize(objConfig.resolved.videosFolder.value);
   screenshotsFolder = path.normalize(objConfig.resolved.screenshotsFolder.value);
 
   console.debug("  Testing Type:", objConfig.testingType);
-  console.debug("  specPattern:", specPattern);
-  console.debug("  specRoot:", specRoot);
   console.debug("  VideoFolder:", videosFolder);
   console.debug("  ScreenshotsFolder:", screenshotsFolder);
   console.debug("  Options:", options);
 }
 
-function createTestRecord(test) {
+function createTestRecord(test, specRelativePath) {
   var testName;
   var testFullName; // Needed for Image File naming :<
-  var testFileName;
   var className;
 
   // Checking if Root Testsuite test cases (no Describe) - (i.e. activeDescribeCount == 0)
   if ( test.title == test.fullTitle() ) {
     testName = test.title;
     testFullName = test.title;
-    testFileName = test.parent.file;
     className = path.basename(test.parent.file); // trimming off the path
   } else {
     let parentObj = test.parent;
@@ -84,7 +75,6 @@ function createTestRecord(test) {
     while (parentObj.title != '') {
       theDescribeNames.push(parentObj.title);
       className = parentObj.title;
-      testFileName = parentObj.parent.file
       parentObj = parentObj.parent;
     }
     theDescribeNames.reverse()
@@ -98,7 +88,7 @@ function createTestRecord(test) {
     var failure = {$: {message: err.message, type: err.name}, _: err.stack}; // Note, to force CDATA add "<< "
     const unsafeRegex = /[^ A-Za-z0-9._-]/g;
     var imageBasename = testFullName.replaceAll(unsafeRegex, '').substring(0, 242)+' (failed).png';
-    var imageFile = path.join(testFileName.replace(specRoot, screenshotsFolder), imageBasename);
+    var imageFile = path.join(screenshotsFolder, specRelativePath, imageBasename);
     var imageScreenshot = '[[ATTACHMENT|'+imageFile+']]';
     return {$: {name: testName, classname: className, time: test.duration/1000}, failure: failure, 'system-out': imageScreenshot};
   } else {
@@ -162,6 +152,10 @@ function CypressXML(runner, options) {
   runner.on(EVENT_RUN_END, function() {
     console.debug('RUN END   ...');
 
+    const SPEC_FILE   = path.join(os.tmpdir(), "crx-cypress-spec-relative-path.json");
+    const specRelativePath = path.normalize(JSON.parse(fs.readFileSync(SPEC_FILE)));
+    console.debug("specRelative:", specRelativePath);
+
     // Check if NO TESTS were executed
     if (suites.length == 0 ) return;
 
@@ -189,16 +183,16 @@ function CypressXML(runner, options) {
       }
       var testCases = [];
       s.tests.forEach( function(t){
-        testCases.push(createTestRecord(t));
+        testCases.push(createTestRecord(t, specRelativePath));
         if (t.state == 'failed') suiteStats.failures++;
       })
 
-      var logFile = s.suite.file.replace(specRoot, logsFolder).replace('.js', '.txt');
+      var logFile = path.join(logsFolder, specRelativePath).replace('.js', '.txt');
       var logContent = '';
       if (fs.existsSync(logFile)) {
         logContent = fs.readFileSync(logFile, 'utf8');
       }
-      var videoFile = s.suite.file.replace(specRoot, videosFolder)+'.mp4';
+      var videoFile = path.join(videosFolder, specRelativePath)+'.mp4';
       logContent += '[[ATTACHMENT|' + videoFile +']]';
       var suiteRecord = { $: suiteStats, testcase: testCases, 'system-out': logContent };
       testSuites.push(suiteRecord);
