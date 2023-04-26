@@ -8,6 +8,7 @@ const xml2js = require('xml2js');
 const builder = new xml2js.Builder({cdata: true});
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 
 // https://github.com/mochajs/mocha/wiki/Third-party-reporters
 const {
@@ -24,8 +25,8 @@ var specRoot;
 var videosFolder;
 var screenshotsFolder;
 
-// Logger plugin Settings
-var logsFolders;
+// Cypress Terminal plugin settings - https://github.com/archfz/cypress-terminal-report
+var logsFolder;
 
 // Reporter Setting
 var resultsFolder;
@@ -36,37 +37,33 @@ var resultsFolder;
  * @returns {testcase record object}
  */
 
-function setConfiguration(options) {
+function loadConfiguration(options) {
 
   console.debug('START: configuration & options:');
 
   resultsFolder = 'results';
-  logsFolders = path.join('cypress', 'logs');
+  logsFolder = path.join('cypress', 'logs');
 
-  // Add error checking!!
-  const JSON_FILE = "__config.json";
-  try {
-    const jsonConfig = fs.readFileSync(JSON_FILE);
-    const objConfig  = JSON.parse(jsonConfig);
-    var specPattern = objConfig.resolved.specPattern.value;
-    var indx = specPattern.indexOf("/**/");
-    var root = specPattern.substring(0,indx);
-    specRoot = path.normalize(root);
-    videosFolder = path.normalize(objConfig.resolved.videosFolder.value);
-    screenshotsFolder = path.normalize(objConfig.resolved.screenshotsFolder.value);
-
-    console.log("  Testing Type:", objConfig.testingType);
-    console.log("  specPattern:", specPattern);
-    console.log("  specRoot:", specRoot);
-    console.log("  VideoFolder:", videosFolder);
-    console.log("  ScreenshotsFolder:", screenshotsFolder);
-
-  } catch (error) {
-    console.error("cypress.config.js requires 'config' plugin \n", error);
-    throw error;
+  const CONFIG_FILE = path.join(os.tmpdir(), "cxr-cypress.config.json");
+  if (! fs.existsSync(CONFIG_FILE) ) {
+    console.error("PROBLEM: This reporter requires to be configured as a plugin in 'cypress.config.js'");
   }
-  console.log("  Options:", options);
 
+  const jsonConfig = fs.readFileSync(CONFIG_FILE);
+  const objConfig  = JSON.parse(jsonConfig);
+  var specPattern = objConfig.resolved.specPattern.value;
+  var indx = specPattern.indexOf("/**/");
+  var root = specPattern.substring(0,indx);
+  specRoot = path.normalize(root);
+  videosFolder = path.normalize(objConfig.resolved.videosFolder.value);
+  screenshotsFolder = path.normalize(objConfig.resolved.screenshotsFolder.value);
+
+  console.debug("  Testing Type:", objConfig.testingType);
+  console.debug("  specPattern:", specPattern);
+  console.debug("  specRoot:", specRoot);
+  console.debug("  VideoFolder:", videosFolder);
+  console.debug("  ScreenshotsFolder:", screenshotsFolder);
+  console.debug("  Options:", options);
 }
 
 function createTestRecord(test) {
@@ -112,7 +109,7 @@ function createTestRecord(test) {
 function CypressXML(runner, options) {
   Mocha.reporters.Base.call(this, runner, options);
 
-  setConfiguration(options);
+  loadConfiguration(options);
 
   // Variables
   var activeDescribes;   // 0 = ROOT, 1 = TESTSUITE, > 0 = NESTED
@@ -196,7 +193,7 @@ function CypressXML(runner, options) {
         if (t.state == 'failed') suiteStats.failures++;
       })
 
-      var logFile = s.suite.file.replace(specRoot, logsFolders).replace('.js', '.txt');
+      var logFile = s.suite.file.replace(specRoot, logsFolder).replace('.js', '.txt');
       var logContent = '';
       if (fs.existsSync(logFile)) {
         logContent = fs.readFileSync(logFile, 'utf8');
