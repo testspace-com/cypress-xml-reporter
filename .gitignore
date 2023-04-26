@@ -3,7 +3,8 @@ cypress/screenshots
 cypress/videos
 cypress/logs
 results/
+# Results from other reporters
 results.*
 xunit.xml
-__config.json
-.SAVE
+# Local stuff
+.TEMP
