@@ -45,7 +45,7 @@ function loadConfiguration(options) {
 
   const CONFIG_FILE = path.join(os.tmpdir(), "cxr-cypress.config.json");
   if (! fs.existsSync(CONFIG_FILE) ) {
-    console.error("PROBLEM: This reporter requires to be configured as a plugin in 'cypress.config.js'");
+    throw new Error("PROBLEM: This reporter requires to be configured as a plugin in 'cypress.config.js'");
   }
 
   const jsonConfig = fs.readFileSync(CONFIG_FILE);
@@ -153,7 +153,7 @@ function CypressXML(runner, options) {
     console.debug('RUN END   ...');
 
     const SPEC_FILE   = path.join(os.tmpdir(), "crx-cypress-spec-relative-path.json");
-    const specRelativePath = path.normalize(JSON.parse(fs.readFileSync(SPEC_FILE)));
+    const specRelativePath = path.normalize(fs.readFileSync(SPEC_FILE).toString());
     console.debug("specRelative:", specRelativePath);
 
     // Check if NO TESTS were executed

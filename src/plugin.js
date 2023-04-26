@@ -12,6 +12,6 @@ module.exports = function (on) {
     fs.unlinkSync(CONFIG_FILE);
   });
   on('before:spec', async(spec) => {
-    fs.writeFileSync(SPEC_FILE,JSON.stringify(spec.relativeToCommonRoot) )
+    fs.writeFileSync(SPEC_FILE, spec.relativeToCommonRoot);
   });
 };
