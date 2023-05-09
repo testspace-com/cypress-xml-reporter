@@ -155,8 +155,8 @@ function CypressXML(runner, options) {
   runner.on(EVENT_RUN_END, function() {
     console.debug('RUN END   ...');
 
-    const CURRENT_SPEC_HANDLE = path.join(os.tmpdir(), "cxr.spec-relative-path."+uniqueFileId);
-    const specRelativePath = path.normalize(fs.readFileSync(CURRENT_SPEC_HANDLE).toString());
+    const currentSpecHandle = path.join(os.tmpdir(), "cxr.spec-relative-path."+uniqueFileId);
+    const specRelativePath = path.normalize(fs.readFileSync(currentSpecHandle).toString());
     console.debug("specRelative:", specRelativePath);
 
     // Check if NO TESTS were executed
