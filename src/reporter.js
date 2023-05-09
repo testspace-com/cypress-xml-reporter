@@ -36,6 +36,8 @@ var resultsFolder;
  * @returns {testcase record object}
  */
 
+var socketId;
+
 function loadConfiguration(options) {
 
   console.debug('START: configuration & options:');
@@ -43,13 +45,14 @@ function loadConfiguration(options) {
   resultsFolder = 'results';
   logsFolder = path.join('cypress', 'logs');
 
-  const CONFIG_FILE = path.join(os.tmpdir(), "cxr-cypress.config.json");
+  const CONFIG_FILE = path.join(os.tmpdir(), "cypress-xml-reporter.config.json");
   if (!fs.existsSync(CONFIG_FILE)) {
     throw new Error("This reporter requires to be configured as a plugin in 'cypress.config.js'");
   }
 
   const jsonConfig = fs.readFileSync(CONFIG_FILE);
   const objConfig = JSON.parse(jsonConfig);
+  socketId = objConfig.socketId; // Unique file Id
   videosFolder = path.normalize(objConfig.resolved.videosFolder.value);
   screenshotsFolder = path.normalize(objConfig.resolved.screenshotsFolder.value);
 
@@ -150,9 +153,9 @@ function CypressXML(runner, options) {
   });
 
   runner.on(EVENT_RUN_END, function() {
-    console.debug('RUN END   ...');
+    console.debug('RUN END   ...', process.pid);
 
-    const SPEC_FILE = path.join(os.tmpdir(), "crx-cypress-spec-relative-path");
+    var SPEC_FILE = path.join(os.tmpdir(), "cypress-xml-reporter.spec-relative-path."+socketId);
     const specRelativePath = path.normalize(fs.readFileSync(SPEC_FILE).toString());
     console.debug("specRelative:", specRelativePath);
 
