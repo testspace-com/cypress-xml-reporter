@@ -1,20 +1,20 @@
 const fs = require('fs');
 const os = require('os')
 const path = require('path')
-const CONFIG_FILE = path.join(os.tmpdir(), "cypress-xml-reporter.config.json");
-var SPEC_FILE;
-var socketId;
+const CONFIG_FILE = path.join(os.tmpdir(), "cxr.config.json");
+var currentSpecHandle;
+var uniqueFileId;
 
 module.exports = function (on) {
   on('before:run', async (details) => {
     fs.writeFileSync(CONFIG_FILE, JSON.stringify(details.config, null, 4));
-    socketId = details.config.socketId;
+    uniqueFileId = details.config.socketId;
   });
   on('after:run', async()  => {
-    fs.unlinkSync(SPEC_FILE);
+    fs.unlinkSync(currentSpecHandle);
   });
   on('before:spec', async(spec) => {
-    SPEC_FILE = path.join(os.tmpdir(), "cypress-xml-reporter.spec-relative-path."+socketId);
-    fs.writeFileSync(SPEC_FILE, spec.relativeToCommonRoot);
+    currentSpecHandle = path.join(os.tmpdir(), "cxr.spec-relative-path."+uniqueFileId);
+    fs.writeFileSync(currentSpecHandle, spec.relativeToCommonRoot);
   });
 };
