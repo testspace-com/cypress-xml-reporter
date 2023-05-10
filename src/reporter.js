@@ -38,11 +38,29 @@ var resultsFolder;
 
 var uniqueFileId;
 
+function getSettings(options) {
+
+  var config = {
+    resultsFolder: 'results',
+  };
+
+  if (options !== null) {
+    if ('resultsFolder' in options) {
+      config.resultsFolder = options.resultsFolder;
+    }
+  }
+  if (process.env['RESULTS_FOLDER'] !== undefined) {
+    config.resultsFolder = process.env['RESULTS_FOLDER'];
+  }
+  return config;
+}
+
 function loadConfiguration(options) {
 
   console.debug('START: configuration & options:');
 
-  resultsFolder = 'results';
+  var config = getSettings(options.reporterOptions);
+  resultsFolder = config.resultsFolder;
   logsFolder = path.join('cypress', 'logs');
 
   const CONFIG_FILE = path.join(os.tmpdir(), "cxr.config.json");
@@ -59,6 +77,7 @@ function loadConfiguration(options) {
   console.debug("  Testing Type:", objConfig.testingType);
   console.debug("  VideoFolder:", videosFolder);
   console.debug("  ScreenshotsFolder:", screenshotsFolder);
+  console.debug("  ResultsFolder:", resultsFolder);
   console.debug("  Options:", options);
 }
 
