@@ -20,15 +20,12 @@ const {
   EVENT_SUITE_END
 } = Mocha.Runner.constants
 
-// Cypress Settings
-var videosFolder;
-var screenshotsFolder;
-
-// Cypress Terminal plugin settings - https://github.com/archfz/cypress-terminal-report
-var logsFolder;
-
-// Reporter Setting
-var resultsFolder;
+var config = {
+  videosFolder: path.join('cypress','videos'),
+  screenshotsFolder: path.join('cypress','screenshots'),
+  logsFolder: path.join('cypress', 'logs'), // Cypress Terminal plugin settings - https://github.com/archfz/cypress-terminal-report
+  resultsFolder: 'results', // Reporter Setting
+};
 
 /**
  * Process the Runner test object
@@ -38,30 +35,15 @@ var resultsFolder;
 
 var uniqueFileId;
 
-function getSettings(options) {
-
-  var config = {
-    resultsFolder: 'results',
-  };
-
-  if (options !== null) {
-    if ('resultsFolder' in options) {
-      config.resultsFolder = options.resultsFolder;
-    }
-  }
-  if (process.env['RESULTS_FOLDER'] !== undefined) {
-    config.resultsFolder = process.env['RESULTS_FOLDER'];
-  }
-  return config;
-}
-
-function loadConfiguration(options) {
+function getConfiguration(options) {
 
   console.debug('START: configuration & options:');
 
-  var config = getSettings(options.reporterOptions);
-  resultsFolder = config.resultsFolder;
-  logsFolder = path.join('cypress', 'logs');
+  if (process.env['RESULTS_FOLDER']) {
+    config.resultsFolder = process.env['RESULTS_FOLDER'];
+  } else if (options && 'resultsFolder' in options) {
+    config.resultsFolder = options.resultsFolder;
+  }
 
   const CONFIG_FILE = path.join(os.tmpdir(), "cxr.config.json");
   if (!fs.existsSync(CONFIG_FILE)) {
@@ -71,13 +53,14 @@ function loadConfiguration(options) {
   const jsonConfig = fs.readFileSync(CONFIG_FILE);
   const objConfig = JSON.parse(jsonConfig);
   uniqueFileId = objConfig.socketId;
-  videosFolder = path.normalize(objConfig.resolved.videosFolder.value);
-  screenshotsFolder = path.normalize(objConfig.resolved.screenshotsFolder.value);
+  config.videosFolder = path.normalize(objConfig.resolved.videosFolder.value);
+  config.screenshotsFolder = path.normalize(objConfig.resolved.screenshotsFolder.value);
 
   console.debug("  Testing Type:", objConfig.testingType);
-  console.debug("  VideoFolder:", videosFolder);
-  console.debug("  ScreenshotsFolder:", screenshotsFolder);
-  console.debug("  ResultsFolder:", resultsFolder);
+  console.debug("  VideoFolder:", config.videosFolder);
+  console.debug("  ScreenshotsFolder:", config.screenshotsFolder);
+  console.debug("  LogsFolder:", config.logsFolder);
+  console.debug("  ResultsFolder:", config.resultsFolder);
   console.debug("  Options:", options);
 }
 
@@ -110,7 +93,7 @@ function createTestRecord(test, specRelativePath) {
     var failure = {$: {message: err.message, type: err.name}, _: err.stack}; // Note, to force CDATA add "<< "
     const unsafeRegex = /[^ A-Za-z0-9._-]/g;
     var imageBasename = testFullName.replaceAll(unsafeRegex, '').substring(0, 242)+' (failed).png';
-    var imageFile = path.join(screenshotsFolder, specRelativePath, imageBasename);
+    var imageFile = path.join(config.screenshotsFolder, specRelativePath, imageBasename);
     var imageScreenshot = '[[ATTACHMENT|'+imageFile+']]';
     return {$: {name: testName, classname: className, time: test.duration/1000}, failure: failure, 'system-out': imageScreenshot};
   } else {
@@ -121,7 +104,7 @@ function createTestRecord(test, specRelativePath) {
 function CypressXML(runner, options) {
   Mocha.reporters.Base.call(this, runner, options);
 
-  loadConfiguration(options);
+  getConfiguration(options);
 
   // Variables
   var activeDescribes;   // 0 = ROOT, 1 = TESTSUITE, > 0 = NESTED
@@ -209,12 +192,12 @@ function CypressXML(runner, options) {
         if (t.state == 'failed') suiteStats.failures++;
       })
 
-      var logFile = path.join(logsFolder, specRelativePath).replace('.js', '.txt');
+      var logFile = path.join(config.logsFolder, specRelativePath).replace('.js', '.txt');
       var logContent = '';
       if (fs.existsSync(logFile)) {
         logContent = fs.readFileSync(logFile, 'utf8');
       }
-      var videoFile = path.join(videosFolder, specRelativePath)+'.mp4';
+      var videoFile = path.join(config.videosFolder, specRelativePath)+'.mp4';
       logContent += '[[ATTACHMENT|' + videoFile +']]';
       var suiteRecord = { $: suiteStats, testcase: testCases, 'system-out': logContent };
       testSuites.push(suiteRecord);
@@ -222,7 +205,7 @@ function CypressXML(runner, options) {
 
     var results = {testsuites: {$: rootStats, testsuite: testSuites}}
     var xml = builder.buildObject(results);
-    var xmlFile = path.join(resultsFolder, suites[0].suite.file)+'.xml';
+    var xmlFile = path.join(config.resultsFolder, suites[0].suite.file)+'.xml';
     var folder = path.dirname(xmlFile);
     if (!fs.existsSync(folder)) {
       fs.mkdirSync(folder, {recursive: true});
