@@ -42,7 +42,7 @@ function loadConfiguration(options) {
   if (process.env['RESULTS_FOLDER']) {
     config.resultsFolder = process.env['RESULTS_FOLDER'];
   } else if (options.reporterOptions && 'resultsFolder' in options.reporterOptions) {
-    config.resultsFolder = options.resultsFolder;
+    config.resultsFolder = options.reporterOptions.resultsFolder;
   }
 
   const CONFIG_FILE = path.join(os.tmpdir(), "cxr.config.json");
