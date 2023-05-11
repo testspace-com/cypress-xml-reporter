@@ -35,13 +35,13 @@ var config = {
 
 var uniqueFileId;
 
-function getConfiguration(options) {
+function loadConfiguration(options) {
 
   console.debug('START: configuration & options:');
 
   if (process.env['RESULTS_FOLDER']) {
     config.resultsFolder = process.env['RESULTS_FOLDER'];
-  } else if (options && 'resultsFolder' in options) {
+  } else if (options.reporterOptions && 'resultsFolder' in options.reporterOptions) {
     config.resultsFolder = options.resultsFolder;
   }
 
@@ -104,7 +104,7 @@ function createTestRecord(test, specRelativePath) {
 function CypressXML(runner, options) {
   Mocha.reporters.Base.call(this, runner, options);
 
-  getConfiguration(options);
+  loadConfiguration(options);
 
   // Variables
   var activeDescribes;   // 0 = ROOT, 1 = TESTSUITE, > 0 = NESTED
