@@ -23,7 +23,8 @@ const {
 var config = {
   videosFolder: path.join('cypress','videos'),
   screenshotsFolder: path.join('cypress','screenshots'),
-  logsFolder: path.join('cypress', 'logs'), // Cypress Terminal plugin settings - https://github.com/archfz/cypress-terminal-report
+  logsFolder: null,  // Cypress Terminal plugin settings - https://github.com/archfz/cypress-terminal-report
+  logFileExt: 'txt',
   resultsFolder: 'results', // Reporter Setting
 };
 
@@ -34,6 +35,10 @@ var config = {
  */
 
 var uniqueFileId;
+
+function getKeyByValue(object, value) {
+  return Object.keys(object).find(key => object[key] === value);
+}
 
 function loadConfiguration(options) {
 
@@ -56,10 +61,24 @@ function loadConfiguration(options) {
   config.videosFolder = path.normalize(objConfig.resolved.videosFolder.value);
   config.screenshotsFolder = path.normalize(objConfig.resolved.screenshotsFolder.value);
 
+  // https://github.com/archfz/cypress-terminal-report#log-specs-in-separate-files
+  if (objConfig.logsOptions && 'outputRoot' in objConfig.logsOptions && 'outputTarget' in objConfig.logsOptions) {
+    var supportType = getKeyByValue(objConfig.logsOptions.outputTarget, 'txt');
+    if (supportType !== undefined) {
+      let output = supportType.split('|')
+      config.logFileExt = "."+output[1];
+      config.logsFolder = path.join(path.normalize(objConfig.logsOptions.outputRoot), output[0]);
+    }
+  }
+
+  if (objConfig.logsOptions && config.logsFolder === null) {
+    console.log("Terminal Report Configuration for Reporter not valid:", objConfig.logsOptions)
+  }
+
   console.debug("  Testing Type:", objConfig.testingType);
   console.debug("  VideoFolder:", config.videosFolder);
   console.debug("  ScreenshotsFolder:", config.screenshotsFolder);
-  console.debug("  LogsFolder:", config.logsFolder);
+  console.debug("  LogsFolder:", config.logsFolder, "ext:", config.logFileExt);
   console.debug("  ResultsFolder:", config.resultsFolder);
   console.debug("  Options:", options);
 }
@@ -191,15 +210,18 @@ function CypressXML(runner, options) {
         testCases.push(createTestRecord(t, specRelativePath));
         if (t.state == 'failed') suiteStats.failures++;
       })
-
-      var logFile = path.join(config.logsFolder, specRelativePath).replace('.js', '.txt');
       var logContent = '';
-      if (fs.existsSync(logFile)) {
-        logContent = fs.readFileSync(logFile, 'utf8');
+      if (config.logsFolder !== null) {
+        var logFile = path.join(config.logsFolder, specRelativePath).replace('.js', config.logFileExt);
+        if (fs.existsSync(logFile)) {
+          logContent = fs.readFileSync(logFile, 'utf8');
+        }
       }
       var videoFile = path.join(config.videosFolder, specRelativePath)+'.mp4';
       logContent += '[[ATTACHMENT|' + videoFile +']]';
-      var suiteRecord = { $: suiteStats, testcase: testCases, 'system-out': logContent };
+      var suiteRecord;
+      if (suiteStats.tests == "0") suiteRecord = { $: suiteStats, testcase: testCases };
+      else suiteRecord = { $: suiteStats, testcase: testCases, 'system-out': logContent };
       testSuites.push(suiteRecord);
     })
 

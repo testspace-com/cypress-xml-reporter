@@ -5,8 +5,11 @@ const CONFIG_FILE = path.join(os.tmpdir(), "cxr.config.json");
 var currentSpecHandle;
 var uniqueFileId;
 
-module.exports = function (on) {
+module.exports = function (on, logsOptions) {
   on('before:run', async (details) => {
+    if (typeof logsOptions != "undefined") {
+      details.config.logsOptions = logsOptions;
+    }
     fs.writeFileSync(CONFIG_FILE, JSON.stringify(details.config, null, 4));
     uniqueFileId = details.config.socketId;
   });

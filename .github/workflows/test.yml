@@ -18,6 +18,7 @@ jobs:
           domain: ${{github.repository_owner}}
       - run: npm install
       - run: npm run data || true
+      - run: npm run datalog || true
       - run: npm run test
       - name: Push test result to Testspace
         run: |
