@@ -2,7 +2,7 @@ const { defineConfig } = require('cypress');
 
 module.exports = defineConfig({
   reporterOptions: {
-    resultsFolder: 'resultslog'
+    resultsFolder: 'results/log'
   },
   e2e: {
     specPattern: "cypress/e2e/**/*.cy.{js,jsx,ts,tsx}",

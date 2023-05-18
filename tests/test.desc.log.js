@@ -13,11 +13,12 @@ const testDataName = testName.replace('test.', 'data.').replace('.log.js', '.cy.
  * Derived settings
  */
 const testFile = path.join('cypress', 'e2e', testDataName);
-const resultsFile = path.join('resultslog', testFile)+'.xml';
+const resultsFile = path.join('results', 'log', testFile)+'.xml';
 const videoFile = path.join('cypress', 'videos', testDataName)+'.mp4';
 const screenshotFile = path.join('cypress', 'screenshots', testDataName, 'TEST1 -- case3 (failed).png');
 
-const logContent = ":\r\n    TEST1 -> case1\r\n\r\n    TEST1 -> case2\r\n\r\n    TEST1 -> case3\r\n        cy:command (X): assert\texpected **1** to equal **2**\n\r\n";
+// Remove "spaces" and "newlines" variants
+const logContent = ":TEST1->case1TEST1->case2TEST1->case3cy:command(X):assertexpected**1**toequal**2**";
 const systemOut = testFile+logContent+"[[ATTACHMENT|"+videoFile+"]]";
 
 /**
@@ -57,6 +58,7 @@ describe(testName, () => {
     });
     it('System-out', () => {
       var systemout = suites[1]['system-out'][0];
+      systemout = systemout.replace(/\s+|\r?\n|\r/g, '');
       expect(systemout).to.equal(systemOut);
     });
     describe('Testcases', ()=> {

@@ -3,7 +3,6 @@ cypress/screenshots
 cypress/videos
 cypress/logs
 results/
-resultslog/
 # Results from other reporters
 results.*
 xunit.xml
