@@ -72,7 +72,7 @@ function loadConfiguration(options) {
   }
 
   if (objConfig.logsOptions && !config.logsFolder) {
-    console.log("Reporter not configured correctly for terminal logging");
+    console.log("The terminal logging options are not configured correctly for this Reporter");
   }
 
   console.debug("  Testing Type:", objConfig.testingType);
