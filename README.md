@@ -54,7 +54,7 @@ To capture terminal output as log files the [Cypress terminal report](https://ww
 ```
 npm install cypress-terminal-report --save-dev
 ```
-The package is required to be configured for [Logging to files](https://github.com/archfz/cypress-terminal-report#logging-to-files), setting the **type** format as `txt`. The terminal report options are required for *both plugins*:
+The package is required to be configured for [log specs in separate files](https://github.com/archfz/cypress-terminal-report#logging-to-files), setting the **type** format as `txt`.
 
 ```
 setupNodeEvents(on, config) {
@@ -68,6 +68,10 @@ setupNodeEvents(on, config) {
     }
   };
   require('cypress-terminal-report/src/installLogsPrinter')(on, logsOptions);
-  require('cypress-xml-reporter/src/plugin') (on, logsOptions);
 }
+```
+
+And pass in the `logsOptions` to the reporter plugin:
+```
+  require('cypress-xml-reporter/src/plugin') (on, logsOptions);
 ```

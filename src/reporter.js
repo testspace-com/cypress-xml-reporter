@@ -64,15 +64,15 @@ function loadConfiguration(options) {
   // https://github.com/archfz/cypress-terminal-report#log-specs-in-separate-files
   if (objConfig.logsOptions && 'outputRoot' in objConfig.logsOptions && 'outputTarget' in objConfig.logsOptions) {
     var supportType = getKeyByValue(objConfig.logsOptions.outputTarget, 'txt');
-    if (supportType !== undefined) {
+    if (supportType) {
       let output = supportType.split('|')
       config.logFileExt = "."+output[1];
       config.logsFolder = path.join(path.normalize(objConfig.logsOptions.outputRoot), output[0]);
     }
   }
 
-  if (objConfig.logsOptions && config.logsFolder === null) {
-    console.log("Terminal Report Configuration for Reporter not valid:", objConfig.logsOptions)
+  if (objConfig.logsOptions && !config.logsFolder) {
+    console.log("Reporter not configured correctly for terminal logging");
   }
 
   console.debug("  Testing Type:", objConfig.testingType);
@@ -211,17 +211,15 @@ function CypressXML(runner, options) {
         if (t.state == 'failed') suiteStats.failures++;
       })
       var logContent = '';
-      if (config.logsFolder !== null) {
+      if (config.logsFolder) {
         var logFile = path.join(config.logsFolder, specRelativePath).replace('.js', config.logFileExt);
         if (fs.existsSync(logFile)) {
-          logContent = fs.readFileSync(logFile, 'utf8');
+          logContent = fs.readFileSync(logFile);
         }
       }
       var videoFile = path.join(config.videosFolder, specRelativePath)+'.mp4';
       logContent += '[[ATTACHMENT|' + videoFile +']]';
-      var suiteRecord;
-      if (suiteStats.tests == "0") suiteRecord = { $: suiteStats, testcase: testCases };
-      else suiteRecord = { $: suiteStats, testcase: testCases, 'system-out': logContent };
+      var suiteRecord = { $: suiteStats, testcase: testCases, 'system-out': logContent };
       testSuites.push(suiteRecord);
     })
 
