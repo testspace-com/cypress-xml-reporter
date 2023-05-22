@@ -216,8 +216,9 @@ function CypressXML(runner, options) {
       })
       var logContent = '';
       if (config.logsFolder) {
-        var logFilePath = path.join(config.logsFolder, suiteStats.file.replace(config.logSpecRoot,''));
-        var logFile = logFilePath.replace('.js', config.logFileExt);
+        var relative = suiteStats.file.replace(config.logSpecRoot,'');
+        relative = relative.substring(0, relative.lastIndexOf('.')) + config.logFileExt;
+        var logFile = path.join(config.logsFolder, relative);
         if (fs.existsSync(logFile)) {
           logContent = fs.readFileSync(logFile);
         }
