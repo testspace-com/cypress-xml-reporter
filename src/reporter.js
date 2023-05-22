@@ -25,6 +25,7 @@ var config = {
   screenshotsFolder: path.join('cypress','screenshots'),
   logsFolder: null,  // Cypress Terminal plugin settings - https://github.com/archfz/cypress-terminal-report
   logFileExt: 'txt',
+  logSpecRoot: '',
   resultsFolder: 'results', // Reporter Setting
 };
 
@@ -45,9 +46,9 @@ function loadConfiguration(options) {
   console.debug('START: configuration & options:');
 
   if (process.env['RESULTS_FOLDER']) {
-    config.resultsFolder = process.env['RESULTS_FOLDER'];
+    config.resultsFolder = path.normalize(process.env['RESULTS_FOLDER']);
   } else if (options.reporterOptions && 'resultsFolder' in options.reporterOptions) {
-    config.resultsFolder = options.reporterOptions.resultsFolder;
+    config.resultsFolder = path.normalize(options.reporterOptions.resultsFolder);
   }
 
   const CONFIG_FILE = path.join(os.tmpdir(), "cxr.config.json");
@@ -68,6 +69,9 @@ function loadConfiguration(options) {
       let output = supportType.split('|')
       config.logFileExt = "."+output[1];
       config.logsFolder = path.join(path.normalize(objConfig.logsOptions.outputRoot), output[0]);
+      if (objConfig.logsOptions.specRoot) {
+        config.logSpecRoot = path.normalize(objConfig.logsOptions.specRoot);
+      }
     }
   }
 
@@ -78,7 +82,7 @@ function loadConfiguration(options) {
   console.debug("  Testing Type:", objConfig.testingType);
   console.debug("  VideoFolder:", config.videosFolder);
   console.debug("  ScreenshotsFolder:", config.screenshotsFolder);
-  console.debug("  LogsFolder:", config.logsFolder, "ext:", config.logFileExt);
+  console.debug("  LogsFolder:", config.logsFolder, "ext:", config.logFileExt, "specRoot:", config.logSpecRoot);
   console.debug("  ResultsFolder:", config.resultsFolder);
   console.debug("  Options:", options);
 }
@@ -212,7 +216,8 @@ function CypressXML(runner, options) {
       })
       var logContent = '';
       if (config.logsFolder) {
-        var logFile = path.join(config.logsFolder, specRelativePath).replace('.js', config.logFileExt);
+        var logFilePath = path.join(config.logsFolder, suiteStats.file.replace(config.logSpecRoot,''));
+        var logFile = logFilePath.replace('.js', config.logFileExt);
         if (fs.existsSync(logFile)) {
           logContent = fs.readFileSync(logFile);
         }

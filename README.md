@@ -59,10 +59,7 @@ The package is required to be configured for [log specs in separate files](https
 ```
 setupNodeEvents(on, config) {
   const logsOptions = {
-    printLogsToConsole: "always", // onFail or always
-    printLogsToFile: "always",    // onFail or always
     outputRoot: config.projectRoot + '/cypress/',
-    specRoot: 'cypress/e2e',
     outputTarget: {
       'logs|txt': 'txt',
     }
@@ -71,7 +68,7 @@ setupNodeEvents(on, config) {
 }
 ```
 
-And pass in the `logsOptions` to the reporter plugin:
+And pass in the defined options (i.e *logsOptions*) to the reporter plugin:
 ```
   require('cypress-xml-reporter/src/plugin') (on, logsOptions);
 ```

@@ -5,7 +5,7 @@
   "main": "src/reporter.js",
   "scripts": {
     "data": "npx cypress run --spec \"cypress/e2e/**/data*\" --reporter src/reporter.js",
-    "datalog": "npx cypress run --spec cypress/e2e/data.desc.cy.js --config-file cypress.config.log.js --reporter src/reporter.js",
+    "datalog": "npx cypress run --spec \"cypress/e2e/**/data*\" --config-file cypress.config.log.js --reporter src/reporter.js",
     "test": "mocha tests --reporter xunit --reporter-options output=xunit.xml",
     "lint": "eslint src/*.js cypress/e2e tests/*.js"
   },
