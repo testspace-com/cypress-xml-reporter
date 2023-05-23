@@ -6,11 +6,6 @@ A JUnit XML reporter for Cypress that includes screenshots, videos, and logs.
 ```
 npm install cypress-xml-reporter --save-dev
 ```
-For including logs the https://www.npmjs.com/package/cypress-terminal-report package is supported:
-
-```
-npm install cypress-terminal-report --save-dev
-```
 
 Register the *plugin* in `cypress.config.js`:
 ```
@@ -44,7 +39,7 @@ Or using `cypress.config.js`:
 module.exports = defineConfig({
   reporterOptions: {
     resultsFolder: './path/location'
-  }
+  },
   e2e: {
     setupNodeEvents(on, config) {
       require('cypress-xml-reporter/src/plugin') (on);
@@ -53,6 +48,27 @@ module.exports = defineConfig({
 });
 ```
 
-### Logging Configuration
-TBD
+## Terminal Logging
+To capture terminal output as log files the [Cypress terminal report](https://www.npmjs.com/package/cypress-terminal-report) package is supported:
 
+```
+npm install cypress-terminal-report --save-dev
+```
+The package is required to be configured for [log specs in separate files](https://github.com/archfz/cypress-terminal-report#logging-to-files), setting the **type** format as `txt`.
+
+```
+setupNodeEvents(on, config) {
+  const logsOptions = {
+    outputRoot: config.projectRoot + '/cypress/',
+    outputTarget: {
+      'logs|txt': 'txt',
+    }
+  };
+  require('cypress-terminal-report/src/installLogsPrinter')(on, logsOptions);
+}
+```
+
+And pass in the defined options (i.e *logsOptions*) to the reporter plugin:
+```
+  require('cypress-xml-reporter/src/plugin') (on, logsOptions);
+```
