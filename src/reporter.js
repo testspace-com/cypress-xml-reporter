@@ -220,11 +220,14 @@ function CypressXML(runner, options) {
         relative = relative.substring(0, relative.lastIndexOf('.')) + config.logFileExt;
         var logFile = path.join(config.logsFolder, relative);
         if (fs.existsSync(logFile)) {
-          logContent = fs.readFileSync(logFile);
+          let fileContent = fs.readFileSync(logFile);
+          logContent = fileContent.toString();
         }
       }
       var videoFile = path.join(config.videosFolder, specRelativePath)+'.mp4';
-      logContent += '[[ATTACHMENT|' + videoFile +']]';
+      if (suiteStats.failures > 0) {
+        logContent += '[[ATTACHMENT|' + videoFile +']]';
+      }
       var suiteRecord = { $: suiteStats, testcase: testCases, 'system-out': logContent };
       testSuites.push(suiteRecord);
     })
