@@ -216,15 +216,18 @@ function CypressXML(runner, options) {
       })
       var logContent = '';
       if (config.logsFolder) {
-        var relative = suiteStats.file.replace(config.logSpecRoot,'');
+        let relative = suiteStats.file.replace(config.logSpecRoot,'');
         relative = relative.substring(0, relative.lastIndexOf('.')) + config.logFileExt;
-        var logFile = path.join(config.logsFolder, relative);
+        let logFile = path.join(config.logsFolder, relative);
         if (fs.existsSync(logFile)) {
-          logContent = fs.readFileSync(logFile);
+          let fileContent = fs.readFileSync(logFile);
+          logContent = fileContent.toString();
         }
       }
-      var videoFile = path.join(config.videosFolder, specRelativePath)+'.mp4';
-      logContent += '[[ATTACHMENT|' + videoFile +']]';
+      if (suiteStats.failures > 0) {
+        let videoFile = path.join(config.videosFolder, specRelativePath)+'.mp4';
+        logContent += '[[ATTACHMENT|' + videoFile +']]';
+      }
       var suiteRecord = { $: suiteStats, testcase: testCases, 'system-out': logContent };
       testSuites.push(suiteRecord);
     })
