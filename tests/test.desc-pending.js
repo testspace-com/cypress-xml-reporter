@@ -15,7 +15,7 @@ const testDataName = testName.replace('test.', 'data.').replace('.js', '.cy.js')
 const testFile = path.join('cypress', 'e2e', testDataName);
 const resultsFile = path.join('results', testFile)+'.xml';
 const videoFile = path.join('cypress', 'videos', testDataName)+'.mp4';
-const screenshotFile = path.join('cypress', 'screenshots', testDataName, 'case3 (failed).png');
+
 
 /**
  * Globals
@@ -28,7 +28,7 @@ before( () => {
   parseString(theFile, function (err, results) {
     suites = results.testsuites.testsuite;
     cySuite = results.testsuites.$;
-    fs.writeFileSync('results.json', JSON.stringify(suites, null, 2));
+    fs.writeFileSync('results.json', JSON.stringify(results.testsuites, null, 2));
   });
 });
 
@@ -38,13 +38,13 @@ describe(testName, () => {
       expect(cySuite.name).to.equal('Cypress Tests');
     });
     it('Tests Count', () => {
-      expect(cySuite.tests).to.equal('3');
+      expect(cySuite.tests).to.equal('5');
     });
     it('Failures Count', () => {
       expect(cySuite.failures).to.equal('1');
     });
     it('Pending Count', () => {
-      expect(cySuite.skipped).to.equal('0');
+      expect(cySuite.skipped).to.equal('3');
     });
   });
   describe('Root Suite', () => {
@@ -52,33 +52,52 @@ describe(testName, () => {
       expect(suites[0].$.name).to.equal('Root Suite');
     });
     it('Tests Count', () => {
-      expect(suites[0].$.tests).to.equal('3');
+      expect(suites[0].$.tests).to.equal('0');
     });
     it('File Name', () => {
-      expect(suites[0].$.file).to.equal(testFile);
+      expect(suites[1].$.file).to.equal(testFile);
+    });
+  });
+  describe('TEST1', () => {
+    it('Name', () => {
+      expect(suites[1].$.name).to.equal('TEST1');
+    });
+    it('Tests Count', () => {
+      expect(suites[1].$.tests).to.equal('5');
+    });
+    it('Failures Count', () => {
+      expect(suites[1].$.failures).to.equal('1');
+    });
+    it('Pending Count', () => {
+      expect(suites[1].$.skipped).to.equal('3');
+    });
+    it('File Name', () => {
+      expect(suites[1].$.file).to.equal(testFile);
     });
     it('System-out', () => {
-      var systemout = suites[0]['system-out'][0];
+      var systemout = suites[1]['system-out'][0];
       expect(systemout).to.equal('[[ATTACHMENT|'+videoFile+']]');
     });
     describe('Testcases', ()=> {
       var testcases;
       before(() => {
-        testcases = suites[0]['testcase'];
+        testcases = suites[1]['testcase'];
       });
       it('"case1" name', () => {
-        expect(testcases[0].$.name).to.equal('case1');
+        expect(testcases[0].$.name).to.equal('case1 - skipped');
       });
       it('"case2" name', () => {
-        expect(testcases[1].$.name).to.equal('case2');
+        expect(testcases[1].$.name).to.equal('case2 - pending');
       });
       it('"case3" name', () => {
-        expect(testcases[2].$.name).to.equal('case3');
+        expect(testcases[2].$.name).to.equal('case3 - pending');
       });
-      it('"case3" Failure', () => {
-        var systemout = testcases[2]['system-out'][0];
-        expect(systemout).to.equal('[[ATTACHMENT|'+screenshotFile+']]');
-      })
+      it('"case4" name', () => {
+        expect(testcases[3].$.name).to.equal('case4');
+      });
+      it('"case3" name', () => {
+        expect(testcases[4].$.name).to.equal('case5');
+      });
     });
   });
 });

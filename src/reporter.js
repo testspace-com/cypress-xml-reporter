@@ -16,6 +16,7 @@ const {
   EVENT_RUN_END,
   EVENT_TEST_FAIL,
   EVENT_TEST_PASS,
+  EVENT_TEST_PENDING,
   EVENT_SUITE_BEGIN,
   EVENT_SUITE_END
 } = Mocha.Runner.constants
@@ -135,12 +136,17 @@ function CypressXML(runner, options) {
   const stats = runner.stats;
 
   runner.on(EVENT_TEST_PASS, function(test) {
-    console.debug('       PASSS: %s', test.fullTitle())
+    console.debug('       PASS: %s', test.fullTitle())
     suites[suites.length-1].tests.push(test);  // alway use active suite
   });
 
   runner.on(EVENT_TEST_FAIL, function(test) {
     console.debug('       FAIL:  %s', test.fullTitle()); // err.message, err.name, err.stack
+    suites[suites.length-1].tests.push(test);  // alway use active suite
+  });
+
+  runner.on(EVENT_TEST_PENDING, function(test) {
+    console.debug('       PENDING:  %s', test.fullTitle());
     suites[suites.length-1].tests.push(test);  // alway use active suite
   });
 
@@ -189,9 +195,9 @@ function CypressXML(runner, options) {
 
     var rootStats = {
       name: 'Cypress Tests',
-      tests: stats.tests,
+      tests: stats.passes + stats.failures + stats.pending,
       failures: stats.failures,
-      skipped:stats.tests - stats.failures - stats.passes,
+      skipped: stats.pending,
       errors: 0,
       timestamp: new Date().toUTCString(),
       time: stats.duration / 1000
@@ -213,6 +219,7 @@ function CypressXML(runner, options) {
       s.tests.forEach( function(t){
         testCases.push(createTestRecord(t, specRelativePath));
         if (t.state == 'failed') suiteStats.failures++;
+        if (t.state == 'pending') suiteStats.skipped++;
       })
       var logContent = '';
       if (config.logsFolder) {
