@@ -112,17 +112,21 @@ function createTestRecord(test, specRelativePath) {
     testName = testFullName.replace(className+' -- ','');
   }
 
-  if (test.state === 'failed') {
-    var err = test.err;
-    var failure = {$: {message: err.message, type: err.name}, _: err.stack}; // Note, to force CDATA add "<< "
-    const unsafeRegex = /[^ A-Za-z0-9._-]/g;
-    var imageBasename = testFullName.replaceAll(unsafeRegex, '').substring(0, 242)+' (failed).png';
-    var imageFile = path.join(config.screenshotsFolder, specRelativePath, imageBasename);
-    var imageScreenshot = '[[ATTACHMENT|'+imageFile+']]';
-    return {$: {name: testName, classname: className, time: test.duration/1000}, failure: failure, 'system-out': imageScreenshot};
-  } else {
-    return {$: {name: testName, classname: className, time: test.duration/1000}};
+  const unsafeRegex = /[^ A-Za-z0-9._-]/g;
+  switch (test.state) {
+    case 'failed':
+      var err = test.err;
+      var failure = {$: {message: err.message, type: err.name}, _: err.stack}; // Note, to force CDATA add "<< "
+      var imageBasename = testFullName.replaceAll(unsafeRegex, '').substring(0, 242)+' (failed).png';
+      var imageFile = path.join(config.screenshotsFolder, specRelativePath, imageBasename);
+      var imageScreenshot = '[[ATTACHMENT|'+imageFile+']]';
+      return {$: {name: testName, classname: className, time: test.duration/1000}, failure: failure, 'system-out': imageScreenshot};
+    case 'pending':
+      return {$: {name: testName, classname: className, time: test.duration/1000}, skipped: null};
+    default:
+      return {$: {name: testName, classname: className, time: test.duration/1000}};
   }
+
 }
 
 function CypressXML(runner, options) {
@@ -137,17 +141,17 @@ function CypressXML(runner, options) {
 
   runner.on(EVENT_TEST_PASS, function(test) {
     console.debug('       PASS: %s', test.fullTitle())
-    suites[suites.length-1].tests.push(test);  // alway use active suite
+    suites[suites.length-1].tests.push(test);
   });
 
   runner.on(EVENT_TEST_FAIL, function(test) {
     console.debug('       FAIL:  %s', test.fullTitle()); // err.message, err.name, err.stack
-    suites[suites.length-1].tests.push(test);  // alway use active suite
+    suites[suites.length-1].tests.push(test);
   });
 
   runner.on(EVENT_TEST_PENDING, function(test) {
     console.debug('       PENDING:  %s', test.fullTitle());
-    suites[suites.length-1].tests.push(test);  // alway use active suite
+    suites[suites.length-1].tests.push(test);
   });
 
   runner.on(EVENT_SUITE_BEGIN, function(suite) {
@@ -218,8 +222,14 @@ function CypressXML(runner, options) {
       var testCases = [];
       s.tests.forEach( function(t){
         testCases.push(createTestRecord(t, specRelativePath));
-        if (t.state == 'failed') suiteStats.failures++;
-        if (t.state == 'pending') suiteStats.skipped++;
+        switch (t.state) {
+          case 'failed':
+            suiteStats.failures++;
+            break;
+          case 'pending':
+            suiteStats.skipped++;
+            break;
+        }
       })
       var logContent = '';
       if (config.logsFolder) {
