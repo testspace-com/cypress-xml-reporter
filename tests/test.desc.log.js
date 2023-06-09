@@ -25,16 +25,32 @@ const systemOut = testFile+logContent+"[[ATTACHMENT|"+videoFile+"]]";
  * Globals
  */
 var suites = [];
+var cySuite = {};
 
 before( () => {
   var theFile = fs.readFileSync(resultsFile, 'utf-8');
   parseString(theFile, function (err, results) {
     suites = results.testsuites.testsuite;
+    cySuite = results.testsuites.$;
     fs.writeFileSync('results.json', JSON.stringify(suites, null, 2));
   });
 });
 
 describe(testName, () => {
+  describe('Cypress Suite', () => {
+    it('Name', () => {
+      expect(cySuite.name).to.equal('Cypress Tests');
+    });
+    it('Tests Count', () => {
+      expect(cySuite.tests).to.equal('3');
+    });
+    it('Failures Count', () => {
+      expect(cySuite.failures).to.equal('1');
+    });
+    it('Pending Count', () => {
+      expect(cySuite.skipped).to.equal('0');
+    });
+  });
   describe('Root Suite', () => {
     it('Name', () => {
       expect(suites[0].$.name).to.equal('Root Suite');
