@@ -112,15 +112,17 @@ function createTestRecord(test, specRelativePath) {
     testName = testFullName.replace(className+' -- ','');
   }
 
-  const UNSAFE_REGEX = /[^ A-Za-z0-9._-]/g;
   var record = {$: {name: testName, classname: className, time: test.duration/1000}};
   switch (test.state) {
     case 'failed':
       record['failure'] = {$: {message: test.err.message, type: test.err.name}, _: test.err.stack};
-      var imageBasename = testFullName.replaceAll(UNSAFE_REGEX, '').substring(0, 242)+' (failed).png';
-      var imageFile = path.join(config.screenshotsFolder, specRelativePath, imageBasename);
-      if (fs.existsSync(imageFile)) {
-        record['system-out'] = '[[ATTACHMENT|'+imageFile+']]';
+      {
+        const UNSAFE_REGEX = /[^ A-Za-z0-9._-]/g;
+        let imageBasename = testFullName.replaceAll(UNSAFE_REGEX, '').substring(0, 242)+' (failed).png';
+        let imageFile = path.join(config.screenshotsFolder, specRelativePath, imageBasename);
+        if (fs.existsSync(imageFile)) {
+          record['system-out'] = '[[ATTACHMENT|'+imageFile+']]';
+        }
       }
       break;
     case 'pending':
