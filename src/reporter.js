@@ -112,21 +112,23 @@ function createTestRecord(test, specRelativePath) {
     testName = testFullName.replace(className+' -- ','');
   }
 
-  const unsafeRegex = /[^ A-Za-z0-9._-]/g;
+  const UNSAFE_REGEX = /[^ A-Za-z0-9._-]/g;
+  var record = {$: {name: testName, classname: className, time: test.duration/1000}};
   switch (test.state) {
     case 'failed':
-      var err = test.err;
-      var failure = {$: {message: err.message, type: err.name}, _: err.stack}; // Note, to force CDATA add "<< "
-      var imageBasename = testFullName.replaceAll(unsafeRegex, '').substring(0, 242)+' (failed).png';
+      record['failure'] = {$: {message: test.err.message, type: test.err.name}, _: test.err.stack};
+      var imageBasename = testFullName.replaceAll(UNSAFE_REGEX, '').substring(0, 242)+' (failed).png';
       var imageFile = path.join(config.screenshotsFolder, specRelativePath, imageBasename);
-      var imageScreenshot = '[[ATTACHMENT|'+imageFile+']]';
-      return {$: {name: testName, classname: className, time: test.duration/1000}, failure: failure, 'system-out': imageScreenshot};
+      if (fs.existsSync(imageFile)) {
+        record['system-out'] = '[[ATTACHMENT|'+imageFile+']]';
+      }
+      break;
     case 'pending':
-      return {$: {name: testName, classname: className, time: test.duration/1000}, skipped: null};
-    default:
-      return {$: {name: testName, classname: className, time: test.duration/1000}};
+      record['skipped'] = null;
+      break;
   }
 
+  return record;
 }
 
 function CypressXML(runner, options) {
