@@ -3,10 +3,9 @@ on:
   push:
     paths-ignore:
       - '**.md'
-  pull_request:
-    paths-ignore:
-      - '**.md'
   workflow_dispatch:
+env:
+  DEBUG_ENABLED: true
 jobs:
   test:
     runs-on: ${{ matrix.os }}
@@ -14,7 +13,6 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
         node-version: [16, 18, 20]
-
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
@@ -24,8 +22,8 @@ jobs:
         with:
           domain: ${{github.repository_owner}}
       - run: npm install
-      - run: DEBUG_ENABLED=true npm run data || true
-      - run: DEBUG_ENABLED=true npm run datalog || true
+      - run: npm run data || true
+      - run: npm run datalog || true
       - run: npm run test
       - name: Push test result to Testspace
         run: |
