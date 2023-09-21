@@ -29,5 +29,5 @@ jobs:
       - run: npm run test
       - name: Push test result to Testspace
         run: |
-          testspace [${{ matrix.os}}/node-${{ node-version}}]xunit.xml
+          testspace [${{ matrix.os}}/node-${{ matrix.node-version}}]xunit.xml
         if: always()
