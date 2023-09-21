@@ -18,7 +18,7 @@ const videoFile = path.join('cypress', 'videos', testDataName)+'.mp4';
 const screenshotFile = path.join('cypress', 'screenshots', testDataName, 'TEST1 -- case3 (failed).png');
 
 // Remove "spaces" and "newlines" variants
-const logContent = ":TEST1->case1TEST1->case2TEST1->case3cy:command(X):assertexpected**1**toequal**2**";
+const logContent = ":TEST1->case1TEST1->case2TEST1->case3cy:command(X):assertexpected**1**toequal**2**Actual:1Expected:2";
 const systemOut = testFile+logContent+"[[ATTACHMENT|"+videoFile+"]]";
 
 /**

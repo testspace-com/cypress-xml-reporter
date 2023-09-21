@@ -4,8 +4,9 @@
   "description": "A JUnit XML reporter for Cypress that includes screenshots, videos, and logs.",
   "main": "src/reporter.js",
   "scripts": {
-    "data": "npx cypress run --spec \"cypress/e2e/**/data*\" --reporter src/reporter.js",
-    "datalog": "npx cypress run --spec \"cypress/e2e/**/data*\" --config-file cypress.config.log.js --reporter src/reporter.js",
+    "data": "env DEBUG_ENABLED=true cypress run --spec \"cypress/e2e/**/data*\" --reporter src/reporter.js",
+    "datalog": "env DEBUG_ENABLED=true npx cypress run --spec \"cypress/e2e/**/data*\" --config-file cypress.config.log.js --reporter src/reporter.js",
+    "dataquiet": "npx cypress run --spec \"cypress/e2e/**/data*\" --reporter src/reporter.js -q",
     "test": "mocha tests --reporter xunit --reporter-options output=xunit.xml",
     "lint": "eslint src/*.js cypress/e2e tests/*.js"
   },
@@ -19,7 +20,8 @@
     "junit",
     "xml",
     "xunit",
-    "reporter"
+    "reporter",
+    "Testspace"
   ],
   "author": {
     "name": "Mark Underseth",
@@ -31,13 +33,13 @@
   },
   "homepage": "https://github.com/testspace-com/cypress-xml-reporter#readme",
   "devDependencies": {
-    "chai": "^4.3.7",
-    "cypress": "^12.9.0",
-    "cypress-terminal-report": "^5.0.2",
-    "eslint": "^8.36.0",
+    "chai": "^4.3.8",
+    "cypress": "^12.17.4",
+    "cypress-terminal-report": "^5.3.6",
+    "eslint": "^8.49.0",
     "mocha": "^10.2.0"
   },
   "dependencies": {
-    "xml2js": "^0.4.23"
+    "xml2js": "^0.6.2"
   }
 }

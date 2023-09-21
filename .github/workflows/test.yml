@@ -1,6 +1,11 @@
 name: Test Package
 on:
   push:
+    paths-ignore:
+      - '**.md'
+  pull_request:
+    paths-ignore:
+      - '**.md'
   workflow_dispatch:
 jobs:
   test:
@@ -8,11 +13,13 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
+        node-version: [16.x, 18.x, 20.x]
+
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: '16'
+          node-version: ${{ matrix.node-version }}
       - uses: testspace-com/setup-testspace@v1
         with:
           domain: ${{github.repository_owner}}
@@ -22,5 +29,5 @@ jobs:
       - run: npm run test
       - name: Push test result to Testspace
         run: |
-          testspace [${{ matrix.os}}]xunit.xml
+          testspace [${{ matrix.os}}/node-${{ node-version}}]xunit.xml
         if: always()
