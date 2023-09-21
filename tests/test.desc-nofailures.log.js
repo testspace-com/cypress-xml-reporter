@@ -14,7 +14,7 @@ const testDataName = testName.replace('test.', 'data.').replace('.log.js', '.cy.
  */
 const testFile = path.join('cypress', 'e2e', testDataName);
 const resultsFile = path.join('results','log', testFile)+'.xml';
-const logContent = ":TEST1->case1TEST1->case2TEST1->case3cy:command(K):assertexpected**1**toequal**1**";
+const logContent = ":TEST1->case1TEST1->case2TEST1->case3cy:command(K):assertexpected**1**toequal**1**Actual:1Expected:1";
 const systemOut = testFile+logContent;
 
 /**

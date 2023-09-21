@@ -38,13 +38,19 @@ var config = {
 
 var uniqueFileId;
 
+function debug(message, ...args) {
+  if (process.env['DEBUG_ENABLED'] == "true") {
+    console.debug(message, ...args);
+  }
+}
+
 function getKeyByValue(object, value) {
   return Object.keys(object).find(key => object[key] === value);
 }
 
 function loadConfiguration(options) {
 
-  console.debug('START: configuration & options:');
+  debug('START: configuration & options:');
 
   if (process.env['RESULTS_FOLDER']) {
     config.resultsFolder = path.normalize(process.env['RESULTS_FOLDER']);
@@ -80,12 +86,12 @@ function loadConfiguration(options) {
     console.log("The terminal logging options are not configured correctly for this Reporter");
   }
 
-  console.debug("  Testing Type:", objConfig.testingType);
-  console.debug("  VideoFolder:", config.videosFolder);
-  console.debug("  ScreenshotsFolder:", config.screenshotsFolder);
-  console.debug("  LogsFolder:", config.logsFolder, "ext:", config.logFileExt, "specRoot:", config.logSpecRoot);
-  console.debug("  ResultsFolder:", config.resultsFolder);
-  console.debug("  Options:", options);
+  debug("  Testing Type:", objConfig.testingType);
+  debug("  VideoFolder:", config.videosFolder);
+  debug("  ScreenshotsFolder:", config.screenshotsFolder);
+  debug("  LogsFolder:", config.logsFolder, "ext:", config.logFileExt, "specRoot:", config.logSpecRoot);
+  debug("  ResultsFolder:", config.resultsFolder);
+  debug("  Options:", options);
 }
 
 function createTestRecord(test, specRelativePath) {
@@ -144,17 +150,17 @@ function CypressXML(runner, options) {
   const stats = runner.stats;
 
   runner.on(EVENT_TEST_PASS, function(test) {
-    console.debug('       PASS: %s', test.fullTitle())
+    debug('       PASS: %s', test.fullTitle())
     suites[suites.length-1].tests.push(test);
   });
 
   runner.on(EVENT_TEST_FAIL, function(test) {
-    console.debug('       FAIL:  %s', test.fullTitle()); // err.message, err.name, err.stack
+    debug('       FAIL:  %s', test.fullTitle()); // err.message, err.name, err.stack
     suites[suites.length-1].tests.push(test);
   });
 
   runner.on(EVENT_TEST_PENDING, function(test) {
-    console.debug('       PENDING:  %s', test.fullTitle());
+    debug('       PENDING:  %s', test.fullTitle());
     suites[suites.length-1].tests.push(test);
   });
 
@@ -177,26 +183,26 @@ function CypressXML(runner, options) {
       _activeTestFile = _suite.file;
       suites.push({suite: _suite, tests: new Array()})
     }
-    console.debug('  SUITE BEGIN ...', _activeTestFile, activeDescribes);
+    debug('  SUITE BEGIN ...', _activeTestFile, activeDescribes);
   });
 
   runner.on(EVENT_SUITE_END, function() {
-    console.debug('  SUITE END   ...', activeDescribes);
+    debug('  SUITE END   ...', activeDescribes);
     activeDescribes--;
   });
 
   runner.on(EVENT_RUN_BEGIN, function() {
-    console.debug('RUN BEGIN ...');
+    debug('RUN BEGIN ...');
     activeDescribes = -1;
     suites = [];
   });
 
   runner.on(EVENT_RUN_END, function() {
-    console.debug('RUN END   ...');
+    debug('RUN END   ...');
 
     const currentSpecHandle = path.join(os.tmpdir(), "cxr.spec-relative-path."+uniqueFileId);
     const specRelativePath = path.normalize(fs.readFileSync(currentSpecHandle).toString());
-    console.debug("specRelative:", specRelativePath);
+    debug("specRelative:", specRelativePath);
 
     // Check if NO TESTS were executed
     if (suites.length == 0) return;

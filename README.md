@@ -1,5 +1,15 @@
 # Cypress XML Reporter
+
 A JUnit XML reporter for Cypress that includes screenshots, videos, and logs.
+
+![CI](https://github.com/testspace-com/cypress-xml-reporter/actions/workflows/test.yml/badge.svg) [![npm](https://img.shields.io/npm/v/cypress-xml-reporter.svg?style=flat-square)](http://www.npmjs.com/package/cypress-xml-reporter)
+
+This reporter works with [Testspace](https://testspace.com) to publish CI test results that include:
+
+1. Captured screenshot of a test failure
+2. Captured video for a suite with one or more failing tests
+3. Logs generated using the [cypress terminal reporter](https://www.npmjs.com/package/cypress-terminal-report)
+
 
 ## Installation
 
