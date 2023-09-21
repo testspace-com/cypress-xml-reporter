@@ -4,9 +4,8 @@
   "description": "A JUnit XML reporter for Cypress that includes screenshots, videos, and logs.",
   "main": "src/reporter.js",
   "scripts": {
-    "data": "env DEBUG_ENABLED=true cypress run --spec \"cypress/e2e/**/data*\" --reporter src/reporter.js",
-    "datalog": "env DEBUG_ENABLED=true npx cypress run --spec \"cypress/e2e/**/data*\" --config-file cypress.config.log.js --reporter src/reporter.js",
-    "dataquiet": "npx cypress run --spec \"cypress/e2e/**/data*\" --reporter src/reporter.js -q",
+    "data": "npx cypress run --spec \"cypress/e2e/**/data*\" --reporter src/reporter.js DEBUG_ENABLED=true",
+    "datalog": "npx cypress run --spec \"cypress/e2e/**/data*\" --config-file cypress.config.log.js --reporter src/reporter.js",
     "test": "mocha tests --reporter xunit --reporter-options output=xunit.xml",
     "lint": "eslint src/*.js cypress/e2e tests/*.js"
   },
