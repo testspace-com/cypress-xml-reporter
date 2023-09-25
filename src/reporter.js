@@ -123,7 +123,7 @@ function createTestRecord(test, specRelativePath) {
     case 'failed':
       record['failure'] = {$: {message: test.err.message, type: test.err.name}, _: test.err.stack};
       {
-        const UNSAFE_REGEX = /[^ A-Za-z0-9._-]/g;
+        const UNSAFE_REGEX = /[^ A-Za-z0-9.()_-]/g;
         let imageBasename = testFullName.replaceAll(UNSAFE_REGEX, '').substring(0, 242)+' (failed).png';
         let imageFile = path.join(config.screenshotsFolder, specRelativePath, imageBasename);
         if (fs.existsSync(imageFile)) {
