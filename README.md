@@ -73,7 +73,6 @@ The package is required to be configured for [log specs in separate files](https
 
 ```
 setupNodeEvents(on, config) {
-  video: true, // Cypress v13.x defaults to false
   const logsOptions = {
     outputRoot: config.projectRoot + '/cypress/',
     outputTarget: {
