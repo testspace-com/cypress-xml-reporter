@@ -2,6 +2,7 @@ const expect = require("chai").expect;
 const parseString = require('xml2js').parseString;
 const path = require('path');
 const fs = require('fs');
+const helpers = require('./test_helper');
 
 /**
  * Setting
@@ -54,7 +55,7 @@ describe(testName, () => {
       expect(suites[0].$.tests).to.equal('0');
     });
     it('File Name', () => {
-      expect(suites[1].$.file).to.equal(testFile);
+      expect(suites[1].$.file).to.equal(helpers.normalizePath(testFile));
     });
   });
 });

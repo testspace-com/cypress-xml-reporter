@@ -2,6 +2,8 @@ const expect = require("chai").expect;
 const parseString = require('xml2js').parseString;
 const path = require('path');
 const fs = require('fs');
+const helpers = require('./test_helper');
+
 
 /**
  * Setting
@@ -55,7 +57,7 @@ describe(testName, () => {
       expect(suites[0].$.tests).to.equal('0');
     });
     it('File Name', () => {
-      expect(suites[1].$.file).to.equal(testFile);
+      expect(suites[1].$.file).to.equal(helpers.normalizePath(testFile));
     });
   });
   describe('TEST1', () => {
@@ -66,11 +68,11 @@ describe(testName, () => {
       expect(suites[1].$.tests).to.equal('6');
     });
     it('File Name', () => {
-      expect(suites[1].$.file).to.equal(testFile);
+      expect(suites[1].$.file).to.equal(helpers.normalizePath(testFile));
     });
     it('System-out', () => {
       var systemout = suites[1]['system-out'][0];
-      expect(systemout).to.equal('[[ATTACHMENT|'+videoFile+']]');
+      expect(systemout).to.equal('[[ATTACHMENT|'+helpers.normalizePath(videoFile)+']]');
     });
     describe('Testcases', ()=> {
       var testcases;
@@ -97,7 +99,7 @@ describe(testName, () => {
       });
       it('"NEST -- case3" Failure', () => {
         var systemout = testcases[5]['system-out'][0];
-        expect(systemout).to.equal('[[ATTACHMENT|'+screenshotFile+']]');
+        expect(systemout).to.equal('[[ATTACHMENT|'+helpers.normalizePath(screenshotFile)+']]');
       })
     });
   });
