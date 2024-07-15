@@ -2,7 +2,6 @@ const expect = require("chai").expect;
 const parseString = require('xml2js').parseString;
 const path = require('path');
 const fs = require('fs');
-const helpers = require('./test_helper');
 
 /**
  * Setting
@@ -41,7 +40,7 @@ describe(testName, () => {
       expect(suites[0].$.tests).to.equal('0');
     });
     it('File Name', () => {
-      expect(suites[1].$.file).to.equal(helpers.normalizePath(testFile));
+      expect(suites[1].$.file).to.equal(testFile.replaceAll(path.sep, '/'));
     });
   });
   describe('TEST1', () => {
@@ -52,11 +51,11 @@ describe(testName, () => {
       expect(suites[1].$.tests).to.equal('3');
     });
     it('File Name', () => {
-      expect(suites[1].$.file).to.equal(helpers.normalizePath(testFile));
+      expect(suites[1].$.file).to.equal(testFile.replaceAll(path.sep, '/'));
     });
     it('System-out', () => {
       var systemout = suites[1]['system-out'][0];
-      expect(systemout).to.equal('[[ATTACHMENT|'+helpers.normalizePath(videoFile)+']]');
+      expect(systemout).to.equal('[[ATTACHMENT|'+videoFile.replaceAll(path.sep, '/')+']]');
     });
     describe('Testcases', ()=> {
       var testcases;
@@ -74,7 +73,7 @@ describe(testName, () => {
       });
       it('"case3" Failure', () => {
         var systemout = testcases[2]['system-out'][0];
-        expect(systemout).to.equal('[[ATTACHMENT|'+helpers.normalizePath(screenshotFile1)+']]');
+        expect(systemout).to.equal('[[ATTACHMENT|'+screenshotFile1.replaceAll(path.sep, '/')+']]');
       })
     });
   });
@@ -86,11 +85,11 @@ describe(testName, () => {
       expect(suites[2].$.tests).to.equal('3');
     });
     it('File Name', () => {
-      expect(suites[2].$.file).to.equal(helpers.normalizePath(testFile));
+      expect(suites[2].$.file).to.equal(testFile.replaceAll(path.sep, '/'));
     });
     it('System-out', () => {
       var systemout = suites[2]['system-out'][0];
-      expect(systemout).to.equal('[[ATTACHMENT|'+helpers.normalizePath(videoFile)+']]');
+      expect(systemout).to.equal('[[ATTACHMENT|'+videoFile.replaceAll(path.sep, '/')+']]');
     });
     describe('Testcases', ()=> {
       var testcases;
@@ -108,7 +107,7 @@ describe(testName, () => {
       });
       it('"case3" Failure', () => {
         var systemout = testcases[2]['system-out'][0];
-        expect(systemout).to.equal('[[ATTACHMENT|'+helpers.normalizePath(screenshotFile2)+']]');
+        expect(systemout).to.equal('[[ATTACHMENT|'+screenshotFile2.replaceAll(path.sep, '/')+']]');
       })
     });
   });

@@ -2,7 +2,6 @@ const expect = require("chai").expect;
 const parseString = require('xml2js').parseString;
 const path = require('path');
 const fs = require('fs');
-const helpers = require('./test_helper');
 
 /**
  * Setting
@@ -56,7 +55,7 @@ describe(testName, () => {
       expect(suites[0].$.tests).to.equal('0');
     });
     it('File Name', () => {
-      expect(suites[1].$.file).to.equal(helpers.normalizePath(testFile));
+      expect(suites[1].$.file).to.equal(testFile.replaceAll(path.sep, '/'));
     });
   });
   describe('"TEST SUITE" with Quotes and Slash', () => {
@@ -67,11 +66,11 @@ describe(testName, () => {
       expect(suites[1].$.tests).to.equal('3');
     });
     it('File Name', () => {
-      expect(suites[1].$.file).to.equal(helpers.normalizePath(testFile));
+      expect(suites[1].$.file).to.equal(testFile.replaceAll(path.sep, '/'));
     });
     it('System-out', () => {
       var systemout = suites[1]['system-out'][0];
-      expect(systemout).to.equal('[[ATTACHMENT|'+helpers.normalizePath(videoFile)+']]');
+      expect(systemout).to.equal('[[ATTACHMENT|'+videoFile.replaceAll(path.sep, '/')+']]');
     });
     describe('Testcases', ()=> {
       var testcases;
@@ -89,7 +88,7 @@ describe(testName, () => {
       });
       it('"case3" name with quotes and slash with failure', () => {
         var systemout = testcases[2]['system-out'][0];
-        expect(systemout).to.equal('[[ATTACHMENT|'+helpers.normalizePath(screenshotFile)+']]');
+        expect(systemout).to.equal('[[ATTACHMENT|'+screenshotFile.replaceAll(path.sep, '/')+']]');
       })
     });
   });

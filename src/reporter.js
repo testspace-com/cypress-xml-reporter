@@ -140,7 +140,9 @@ function createTestRecord(test, specRelativePath) {
 }
 
 function normalizePath(pathString) {
-  return pathString.split(path.sep).join('/');
+  if (path.sep !== '/') {
+    return pathString.replaceAll(path.sep, '/');
+  }
 }
 
 function CypressXML(runner, options) {
