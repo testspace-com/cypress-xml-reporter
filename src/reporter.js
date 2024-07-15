@@ -143,6 +143,7 @@ function normalizePath(pathString) {
   if (path.sep !== '/') {
     return pathString.replaceAll(path.sep, '/');
   }
+  return pathString;
 }
 
 function CypressXML(runner, options) {
