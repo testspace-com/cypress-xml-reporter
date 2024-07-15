@@ -19,7 +19,7 @@ const screenshotFile = path.join('cypress', 'screenshots', testDataName, 'TEST1 
 
 // Remove "spaces" and "newlines" variants
 const logContent = ":TEST1->case1TEST1->case2TEST1->case3cy:command(X):assertexpected**1**toequal**2**Actual:1Expected:2";
-const systemOut = testFile+logContent+"[[ATTACHMENT|"+videoFile+"]]";
+const systemOut = testFile+logContent+"[[ATTACHMENT|"+videoFile.replaceAll(path.sep, '/')+"]]";
 
 /**
  * Globals
@@ -59,7 +59,7 @@ describe(testName, () => {
       expect(suites[0].$.tests).to.equal('0');
     });
     it('File Name', () => {
-      expect(suites[1].$.file).to.equal(testFile);
+      expect(suites[1].$.file).to.equal(testFile.replaceAll(path.sep, '/'));
     });
   });
   describe('TEST1', () => {
@@ -70,7 +70,7 @@ describe(testName, () => {
       expect(suites[1].$.tests).to.equal('3');
     });
     it('File Name', () => {
-      expect(suites[1].$.file).to.equal(testFile);
+      expect(suites[1].$.file).to.equal(testFile.replaceAll(path.sep, '/'));
     });
     it('System-out', () => {
       var systemout = suites[1]['system-out'][0];
@@ -99,7 +99,7 @@ describe(testName, () => {
       });
       it('"case3" Failure System-out', () => {
         var systemout = testcases[2]['system-out'][0];
-        expect(systemout).to.equal('[[ATTACHMENT|'+screenshotFile+']]');
+        expect(systemout).to.equal('[[ATTACHMENT|'+screenshotFile.replaceAll(path.sep, '/')+']]');
       });
     });
   });

@@ -55,7 +55,7 @@ describe(testName, () => {
       expect(suites[0].$.tests).to.equal('0');
     });
     it('File Name', () => {
-      expect(suites[1].$.file).to.equal(testFile);
+      expect(suites[1].$.file).to.equal(testFile.replaceAll(path.sep, '/'));
     });
   });
   describe('TEST1', () => {
@@ -72,11 +72,11 @@ describe(testName, () => {
       expect(suites[1].$.skipped).to.equal('3');
     });
     it('File Name', () => {
-      expect(suites[1].$.file).to.equal(testFile);
+      expect(suites[1].$.file).to.equal(testFile.replaceAll(path.sep, '/'));
     });
     it('System-out', () => {
       var systemout = suites[1]['system-out'][0];
-      expect(systemout).to.equal('[[ATTACHMENT|'+videoFile+']]');
+      expect(systemout).to.equal('[[ATTACHMENT|'+videoFile.replaceAll(path.sep, '/')+']]');
     });
     describe('Testcases', ()=> {
       var testcases;

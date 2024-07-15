@@ -127,7 +127,7 @@ function createTestRecord(test, specRelativePath) {
         let imageBasename = testFullName.replaceAll(UNSAFE_REGEX, '').substring(0, 242)+' (failed).png';
         let imageFile = path.join(config.screenshotsFolder, specRelativePath, imageBasename);
         if (fs.existsSync(imageFile)) {
-          record['system-out'] = '[[ATTACHMENT|'+imageFile+']]';
+          record['system-out'] = '[[ATTACHMENT|'+normalizePath(imageFile)+']]';
         }
       }
       break;
@@ -137,6 +137,13 @@ function createTestRecord(test, specRelativePath) {
   }
 
   return record;
+}
+
+function normalizePath(pathString) {
+  if (path.sep !== '/') {
+    return pathString.replaceAll(path.sep, '/');
+  }
+  return pathString;
 }
 
 function CypressXML(runner, options) {
@@ -227,7 +234,7 @@ function CypressXML(runner, options) {
         errors: 0,
         time: (Date.now() - s.suite.timestamp) / 1000,
         timestamp: new Date(s.suite.timestamp).toUTCString(),
-        file: s.suite.file
+        file: normalizePath(s.suite.file)
       }
       var testCases = [];
       s.tests.forEach( function(t){
@@ -243,7 +250,7 @@ function CypressXML(runner, options) {
       })
       var logContent = '';
       if (config.logsFolder) {
-        let relative = suiteStats.file.replace(config.logSpecRoot,'');
+        let relative = s.suite.file.replace(config.logSpecRoot,'');
         relative = relative.substring(0, relative.lastIndexOf('.')) + config.logFileExt;
         let logFile = path.join(config.logsFolder, relative);
         if (fs.existsSync(logFile)) {
@@ -253,7 +260,7 @@ function CypressXML(runner, options) {
       }
       if (suiteStats.failures > 0) {
         let videoFile = path.join(config.videosFolder, specRelativePath)+'.mp4';
-        logContent += '[[ATTACHMENT|' + videoFile +']]';
+        logContent += '[[ATTACHMENT|' + normalizePath(videoFile) +']]';
       }
       var suiteRecord = { $: suiteStats, testcase: testCases, 'system-out': logContent };
       testSuites.push(suiteRecord);

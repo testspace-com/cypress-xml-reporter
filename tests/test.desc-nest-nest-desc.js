@@ -57,7 +57,7 @@ describe(testName, () => {
       expect(suites[0].$.tests).to.equal('0');
     });
     it('File Name', () => {
-      expect(suites[1].$.file).to.equal(testFile);
+      expect(suites[1].$.file).to.equal(testFile.replaceAll(path.sep, '/'));
     });
   });
   describe('TEST1', () => {
@@ -68,11 +68,11 @@ describe(testName, () => {
       expect(suites[1].$.tests).to.equal('9');
     });
     it('File Name', () => {
-      expect(suites[1].$.file).to.equal(testFile);
+      expect(suites[1].$.file).to.equal(testFile.replaceAll(path.sep, '/'));
     });
     it('System-out', () => {
       var systemout = suites[1]['system-out'][0];
-      expect(systemout).to.equal('[[ATTACHMENT|'+videoFile+']]');
+      expect(systemout).to.equal('[[ATTACHMENT|'+videoFile.replaceAll(path.sep, '/')+']]');
     });
     describe('Testcases', ()=> {
       var testcases;
@@ -90,7 +90,7 @@ describe(testName, () => {
       });
       it('"case3" Failure', () => {
         var systemout = testcases[2]['system-out'][0];
-        expect(systemout).to.equal('[[ATTACHMENT|'+screenshotFile1+']]');
+        expect(systemout).to.equal('[[ATTACHMENT|'+screenshotFile1.replaceAll(path.sep, '/')+']]');
       });
       it('"NEST1 -- case1" name', () => {
         expect(testcases[3].$.name).to.equal('NEST1 -- case1');
@@ -103,7 +103,7 @@ describe(testName, () => {
       });
       it('"NEST1 -- case3" Failure', () => {
         var systemout = testcases[5]['system-out'][0];
-        expect(systemout).to.equal('[[ATTACHMENT|'+screenshotFile2+']]');
+        expect(systemout).to.equal('[[ATTACHMENT|'+screenshotFile2.replaceAll(path.sep, '/')+']]');
       });
       it('"NEST1 -- NEST2 -- case1" name', () => {
         expect(testcases[6].$.name).to.equal('NEST1 -- NEST2 -- case1');
@@ -116,7 +116,7 @@ describe(testName, () => {
       });
       it('"NEST1 -- NEST2 -- case3" Failure', () => {
         var systemout = testcases[8]['system-out'][0];
-        expect(systemout).to.equal('[[ATTACHMENT|'+screenshotFile3+']]');
+        expect(systemout).to.equal('[[ATTACHMENT|'+screenshotFile3.replaceAll(path.sep, '/')+']]');
       });
 
     });

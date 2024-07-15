@@ -55,11 +55,11 @@ describe(testName, () => {
       expect(suites[0].$.tests).to.equal('3');
     });
     it('File Name', () => {
-      expect(suites[0].$.file).to.equal(testFile);
+      expect(suites[0].$.file).to.equal(testFile.replaceAll(path.sep, '/'));
     });
     it('System-out', () => {
       var systemout = suites[0]['system-out'][0];
-      expect(systemout).to.equal('[[ATTACHMENT|'+videoFile+']]');
+      expect(systemout).to.equal('[[ATTACHMENT|'+videoFile.replaceAll(path.sep, '/')+']]');
     });
     describe('Testcases', ()=> {
       var testcases;
@@ -77,7 +77,7 @@ describe(testName, () => {
       });
       it('"case3" Failure', () => {
         var systemout = testcases[2]['system-out'][0];
-        expect(systemout).to.equal('[[ATTACHMENT|'+screenshotFile+']]');
+        expect(systemout).to.equal('[[ATTACHMENT|'+screenshotFile.replaceAll(path.sep, '/')+']]');
       })
     });
   });
